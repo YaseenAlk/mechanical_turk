@@ -1,8 +1,10 @@
 package org.neu.ccs.mechanical_turk;
 
 import java.applet.Applet;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -16,6 +18,7 @@ import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
+import javax.swing.JOptionPane;
 
 /**
  * 
@@ -43,17 +46,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	public void paint(Graphics g) {
 		super.paint(g);
 		drawImage(img, g);
-		g.setColor(Color.GREEN);
-		if (press != null && release != null) {
-			System.out.println("Drawing...");
-			int topLeftX, topLeftY, width, height;
-			topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX());
-			topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY());
-			width = (int) Math.abs(press.getX() - release.getX());
-			height = (int) Math.abs(press.getY() - release.getY());
-			
-			g.drawRect(topLeftX, topLeftY, width, height);
-		}
+		checkAndDrawRect(g);
 	}
 
 	@Override
@@ -75,6 +68,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		task.cancel();
+		String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
 	}
 	
 	private class Updater extends TimerTask {
@@ -85,6 +79,20 @@ public class TurkApplet extends JApplet implements MouseListener {
 			repaint();
 		}
 		
+	}
+	
+	private void checkAndDrawRect(Graphics g) {
+		g.setColor(Color.green);
+		if (press != null && release != null) {
+			int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
+				topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
+				width = (int) Math.abs(press.getX() - release.getX()),
+				height = (int) Math.abs(press.getY() - release.getY());
+			
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(5));
+			g.drawRect(topLeftX, topLeftY, width, height);
+		}
 	}
 	
 	private void loadImage() {
