@@ -33,8 +33,6 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private BufferedImage img;
 	
-	private boolean repaintImage;
-	
 	public void init() {
 		timer = new Timer();
 		addMouseListener(this);
@@ -44,8 +42,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	public void paint(Graphics g) {
 		super.paint(g);
-		if (repaintImage)	//oh god why
-			drawImage(img, g);
+		drawImage(img, g);
 		g.setColor(Color.GREEN);
 		if (press != null && release != null) {
 			System.out.println("Drawing...");
@@ -97,13 +94,10 @@ public class TurkApplet extends JApplet implements MouseListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		repaintImage = true;
 	}
 	
 	private void drawImage(BufferedImage img, Graphics g) {
-		
 		g.drawImage(img, 0, 0, null);
-		repaintImage = false;
 	}
 
 }
