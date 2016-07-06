@@ -127,5 +127,11 @@ public class TurkApplet extends JApplet implements MouseListener {
 	private void drawImage(BufferedImage img, Graphics g) {
 		g.drawImage(img, 0, 0, null);
 	}
+	
+	public void undo() {
+		boxCoordinates.remove(boxCoordinates.size()-1);
+		queries.remove(queries.size()-1);
+		
+	}
 
 }
