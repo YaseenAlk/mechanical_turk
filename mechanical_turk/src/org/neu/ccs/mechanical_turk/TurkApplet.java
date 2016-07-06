@@ -1,8 +1,10 @@
 package org.neu.ccs.mechanical_turk;
 
 import java.applet.Applet;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -16,6 +18,7 @@ import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
+import javax.swing.JOptionPane;
 
 /**
  * 
@@ -33,8 +36,6 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private BufferedImage img;
 	
-	private boolean repaintImage;
-	
 	public void init() {
 		timer = new Timer();
 		addMouseListener(this);
@@ -44,19 +45,8 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	public void paint(Graphics g) {
 		super.paint(g);
-		if (repaintImage)	//oh god why
-			drawImage(img, g);
-		g.setColor(Color.GREEN);
-		if (press != null && release != null) {
-			System.out.println("Drawing...");
-			int topLeftX, topLeftY, width, height;
-			topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX());
-			topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY());
-			width = (int) Math.abs(press.getX() - release.getX());
-			height = (int) Math.abs(press.getY() - release.getY());
-			
-			g.drawRect(topLeftX, topLeftY, width, height);
-		}
+		drawImage(img, g);
+		checkAndDrawRect(g);
 	}
 
 	@Override
@@ -78,6 +68,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		task.cancel();
+		String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
 	}
 	
 	private class Updater extends TimerTask {
@@ -90,35 +81,31 @@ public class TurkApplet extends JApplet implements MouseListener {
 		
 	}
 	
-	private void loadImage() {
-		String websiteURL = "https://sites.google.com/site/amztest00/0/";
-		String imageURL = null;
-		int i = 0;
-		/*if(forwardButton)
-		{
-			i += 1;
-		}else if(backButton)
-		{
-		i -=1;
+	private void checkAndDrawRect(Graphics g) {
+		g.setColor(Color.green);
+		if (press != null && release != null) {
+			int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
+				topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
+				width = (int) Math.abs(press.getX() - release.getX()),
+				height = (int) Math.abs(press.getY() - release.getY());
+			
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(5));
+			g.drawRect(topLeftX, topLeftY, width, height);
 		}
-		*/
-		String imageCount = Integer.toString(i);
-		imageURL = websiteURL + i + ".jpg";		
-		System.out.println(imageURL);
-		File urlFile = new File(imageURL);
+	}
+	
+	private void loadImage() {
 		try {
-			img = ImageIO.read(new URL(imageURL));
+			img = ImageIO.read(new URL("http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		repaintImage = true;
 	}
 	
 	private void drawImage(BufferedImage img, Graphics g) {
-		
 		g.drawImage(img, 0, 0, null);
-		repaintImage = false;
 	}
 
 }
