@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -36,9 +37,16 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private BufferedImage img;
 	
+	private ArrayList<Point[]> boxCoordinates;
+	private ArrayList<String> queries;
+	
 	public void init() {
 		timer = new Timer();
 		addMouseListener(this);
+		
+		boxCoordinates = new ArrayList<>();
+		queries = new ArrayList<>();
+		
 		loadImage();
 		//will we need to receive any parameters?
 	}
@@ -69,6 +77,10 @@ public class TurkApplet extends JApplet implements MouseListener {
 	public void mouseReleased(MouseEvent e) {
 		task.cancel();
 		String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
+		queries.add(query);
+		boxCoordinates.add(new Point[]{press, release});
+		
+		press = null; release = null;
 	}
 	
 	private class Updater extends TimerTask {
@@ -83,16 +95,24 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private void checkAndDrawRect(Graphics g) {
 		g.setColor(Color.green);
+		for (Point[] rect : boxCoordinates)
+			drawRect(g, rect);
 		if (press != null && release != null) {
-			int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
-				topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
-				width = (int) Math.abs(press.getX() - release.getX()),
-				height = (int) Math.abs(press.getY() - release.getY());
-			
-			Graphics2D g2 = (Graphics2D) g;
-			g2.setStroke(new BasicStroke(5));
-			g.drawRect(topLeftX, topLeftY, width, height);
+			drawRect(g, press, release);
 		}
+	}
+	
+	private void drawRect(Graphics g, Point... points) {
+		Point press = points[0], release = points[1];
+		int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
+			topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
+			width = (int) Math.abs(press.getX() - release.getX()),
+			height = (int) Math.abs(press.getY() - release.getY());
+			
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(new BasicStroke(3));
+		g.drawRect(topLeftX, topLeftY, width, height);
+
 	}
 	
 	private void loadImage() {
