@@ -12,6 +12,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -35,6 +36,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private Point press, release;
 	
+	private URL imgURL;
 	private BufferedImage img;
 	
 	private ArrayList<Pair> boxCoordinates;
@@ -47,7 +49,12 @@ public class TurkApplet extends JApplet implements MouseListener {
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
 		
-		loadImage();
+		String urlParam = getParameter("imgURL"),
+				defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
+				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
+		
+		
+		loadImage(url);
 		//will we need to receive any parameters?
 	}
 	
@@ -133,13 +140,16 @@ public class TurkApplet extends JApplet implements MouseListener {
 
 	}
 	
-	private void loadImage() {
+	private void loadImage(String URL) {
 		try {
-			img = ImageIO.read(new URL("http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg"));
+			imgURL = new URL(URL);
+			img = ImageIO.read(imgURL);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Image loading failed... Stack Trace below");
 			e.printStackTrace();
-		}
+		} 
+		
+		
 	}
 	
 	private void drawImage(BufferedImage img, Graphics g) {
