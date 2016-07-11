@@ -37,7 +37,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private BufferedImage img;
 	
-	private ArrayList<Point[]> boxCoordinates;
+	private ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
 	
 	public void init() {
@@ -78,7 +78,7 @@ public class TurkApplet extends JApplet implements MouseListener {
 		task.cancel();
 		String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
 		queries.add(query);
-		boxCoordinates.add(new Point[]{press, release});
+		boxCoordinates.add(new Pair(press, release));
 		
 		press = null; release = null;
 	}
@@ -93,17 +93,35 @@ public class TurkApplet extends JApplet implements MouseListener {
 		
 	}
 	
+	private class Pair {
+		private Point start;	// starting point (not necessarily top left)
+		private Point end; 		// ending point (not necessarily bottom right)
+		
+		public Pair(Point s, Point e) {
+			start = s;
+			end = e;
+		}
+		
+		public Point getStart() {
+			return start;
+		}
+		
+		public Point getEnd() {
+			return end;
+		}
+	}
+	
 	private void checkAndDrawRect(Graphics g) {
 		g.setColor(Color.green);
-		for (Point[] rect : boxCoordinates)
-			drawRect(g, rect);
+		for (Pair rect : boxCoordinates)
+			drawRect(g, rect.getStart(), rect.getEnd());
 		if (press != null && release != null) {
 			drawRect(g, press, release);
 		}
 	}
 	
-	private void drawRect(Graphics g, Point... points) {
-		Point press = points[0], release = points[1];
+	private void drawRect(Graphics g, Point start, Point end) {
+		Point press = start, release = end;
 		int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
 			topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
 			width = (int) Math.abs(press.getX() - release.getX()),
