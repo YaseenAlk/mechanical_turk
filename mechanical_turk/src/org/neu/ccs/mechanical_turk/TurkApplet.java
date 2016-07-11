@@ -148,8 +148,15 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	public void undo() {
 		boxCoordinates.remove(boxCoordinates.size()-1);
-		queries.remove(queries.size()-1);
-		
+		queries.remove(queries.size()-1);	
+	}
+	
+	public ArrayList<String> getQueries() {
+		return queries;
+	}
+	
+	public ArrayList<Pair> getBoxCoords() {
+		return this.boxCoordinates;
 	}
 
 }
