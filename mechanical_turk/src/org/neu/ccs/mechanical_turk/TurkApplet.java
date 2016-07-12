@@ -52,7 +52,7 @@ public class TurkApplet extends JApplet {
 		//will we need to receive any parameters?
 		
 		try {
-			DrawingPanel dp = new DrawingPanel("http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg");
+			DrawingPanel dp = new DrawingPanel(url);
 			getContentPane().add(dp);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -117,7 +117,7 @@ public class TurkApplet extends JApplet {
 				g.drawImage(img, 0, 0, this);
 			}
 
-			if (press != null && release != null) {
+			if (press != null && current != null) {
 				g.setColor(Color.blue);
 				drawRect(g, press, current);
 			}
@@ -147,6 +147,7 @@ public class TurkApplet extends JApplet {
 		      boxCoordinates.add(new Pair(press, release));
 		      
 		      press = null;
+		      
 		      repaint();
 		   }
 		
@@ -158,16 +159,18 @@ public class TurkApplet extends JApplet {
 			}
 			
 			@Override
+			public void mousePressed(MouseEvent mEvt) {
+				press = mEvt.getPoint();
+			}
+			
+			@Override
 			public void mouseReleased(MouseEvent mEvt) {
 				release = mEvt.getPoint();
 				current = null;
 				drawToBackground();
 			}
 
-			@Override
-			public void mousePressed(MouseEvent mEvt) {
-				press = mEvt.getPoint();
-			}
+			
 		}
 		
 	}
