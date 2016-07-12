@@ -133,8 +133,8 @@ public class TurkApplet extends JApplet implements MouseListener {
 	
 	private void drawRect(Graphics g, Point start, Point end) {
 		Point press = start, release = end;
-		int topLeftX = (int) ((press.getX() < release.getX()) ? press.getX() : release.getX()),
-			topLeftY = (int) ((press.getY() < release.getY()) ? press.getY() : release.getY()),
+		int topLeftX = (int) Math.min(press.getX(), release.getX()),
+			topLeftY = (int) Math.min(press.getY(), release.getY()),
 			width = (int) Math.abs(press.getX() - release.getX()),
 			height = (int) Math.abs(press.getY() - release.getY());
 			
