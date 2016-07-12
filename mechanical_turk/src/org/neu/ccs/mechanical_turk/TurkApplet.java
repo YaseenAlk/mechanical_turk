@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -21,6 +22,7 @@ import java.util.TimerTask;
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  * 
@@ -29,23 +31,13 @@ import javax.swing.JOptionPane;
  *
  */
 
-public class TurkApplet extends JApplet implements MouseListener {
-	
-	private Timer timer;
-	private TimerTask task;
-	
-	private Point press, release;
-	
+public class TurkApplet extends JApplet {
 	private URL imgURL;
-	private BufferedImage img;
 	
 	private ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
 	
-	public void init() {
-		timer = new Timer();
-		addMouseListener(this);
-		
+	public void init() {	
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
 		
@@ -56,50 +48,126 @@ public class TurkApplet extends JApplet implements MouseListener {
 		
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
-		
-		
-		loadImage(url);
+
 		//will we need to receive any parameters?
+		
+		try {
+			DrawingPanel dp = new DrawingPanel("http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg");
+			getContentPane().add(dp);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void paint(Graphics g) {
 		super.paint(g);
-		drawImage(img, g);
-		checkAndDrawRect(g);
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		press = getMousePosition();
-		task = new Updater();
-		timer.scheduleAtFixedRate(task, 0, 10);
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		task.cancel();
-		String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
-		queries.add(query);
-		boxCoordinates.add(new Pair(press, release));
-		
-		press = null; release = null;
 	}
 	
-	private class Updater extends TimerTask {
+	public void undo() {
+		boxCoordinates.remove(boxCoordinates.size()-1);
+		queries.remove(queries.size()-1);	
+	}
+	
+	public ArrayList<String> getQueries() {
+		return queries;
+	}
+	
+	public ArrayList<Pair> getBoxCoords() {
+		return this.boxCoordinates;
+	}
+	
+	private class DrawingPanel extends JPanel {
+		
+		private Point press, release, current;
 
+		private BufferedImage img;
+		
+		private int imgW, imgH;
+		
+		public DrawingPanel() throws IOException {
+			this(null);
+		}
+		
+		public DrawingPanel(String url) throws IOException {
+			loadImage(url);
+			
+			MyMouseAdapter mma = new MyMouseAdapter();
+			addMouseMotionListener(mma);
+			addMouseListener(mma);
+		}
+		
+		private void loadImage(String URL) throws IOException {
+			imgURL = new URL(URL);
+			BufferedImage bImg = ImageIO.read(imgURL);
+			
+			imgW = bImg.getWidth();
+			imgH = bImg.getHeight();
+			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
+			
+			Graphics g = img.getGraphics();
+			g.drawImage(bImg, 0, 0, this);
+		    g.dispose();
+		}
+		
 		@Override
-		public void run() {
-			release = getMousePosition();
-			repaint();
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			if (img != null) {
+				g.drawImage(img, 0, 0, this);
+			}
+
+			if (press != null && release != null) {
+				g.setColor(Color.blue);
+				drawRect(g, press, current);
+			}
+		}
+		
+		private void drawRect(Graphics g, Point start, Point end) {
+			Point press = start, release = end;
+			int topLeftX = (int) Math.min(press.getX(), release.getX()),
+				topLeftY = (int) Math.min(press.getY(), release.getY()),
+				width = (int) Math.abs(press.getX() - release.getX()),
+				height = (int) Math.abs(press.getY() - release.getY());
+				
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(3));
+			g.drawRect(topLeftX, topLeftY, width, height);
+
+		}
+		
+		public void drawToBackground() {
+		      Graphics g = img.getGraphics();
+		      g.setColor(Color.green);
+		      drawRect(g, press, release);
+		      g.dispose();
+		      
+		      String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
+		      queries.add(query);
+		      boxCoordinates.add(new Pair(press, release));
+		      
+		      press = null;
+		      repaint();
+		   }
+		
+		private class MyMouseAdapter extends MouseAdapter {
+			@Override
+		    public void mouseDragged(MouseEvent mEvt) {
+				current = mEvt.getPoint();
+				DrawingPanel.this.repaint();
+			}
+			
+			@Override
+			public void mouseReleased(MouseEvent mEvt) {
+				release = mEvt.getPoint();
+				current = null;
+				drawToBackground();
+			}
+
+			@Override
+			public void mousePressed(MouseEvent mEvt) {
+				press = mEvt.getPoint();
+			}
 		}
 		
 	}
@@ -120,57 +188,6 @@ public class TurkApplet extends JApplet implements MouseListener {
 		public Point getEnd() {
 			return end;
 		}
-	}
-	
-	private void checkAndDrawRect(Graphics g) {
-		g.setColor(Color.green);
-		for (Pair rect : boxCoordinates)
-			drawRect(g, rect.getStart(), rect.getEnd());
-		if (press != null && release != null) {
-			drawRect(g, press, release);
-		}
-	}
-	
-	private void drawRect(Graphics g, Point start, Point end) {
-		Point press = start, release = end;
-		int topLeftX = (int) Math.min(press.getX(), release.getX()),
-			topLeftY = (int) Math.min(press.getY(), release.getY()),
-			width = (int) Math.abs(press.getX() - release.getX()),
-			height = (int) Math.abs(press.getY() - release.getY());
-			
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(new BasicStroke(3));
-		g.drawRect(topLeftX, topLeftY, width, height);
-
-	}
-	
-	private void loadImage(String URL) {
-		try {
-			imgURL = new URL(URL);
-			img = ImageIO.read(imgURL);
-		} catch (IOException e) {
-			System.out.println("Image loading failed... Stack Trace below");
-			e.printStackTrace();
-		} 
-		
-		
-	}
-	
-	private void drawImage(BufferedImage img, Graphics g) {
-		g.drawImage(img, 0, 0, null);
-	}
-	
-	public void undo() {
-		boxCoordinates.remove(boxCoordinates.size()-1);
-		queries.remove(queries.size()-1);	
-	}
-	
-	public ArrayList<String> getQueries() {
-		return queries;
-	}
-	
-	public ArrayList<Pair> getBoxCoords() {
-		return this.boxCoordinates;
 	}
 
 }
