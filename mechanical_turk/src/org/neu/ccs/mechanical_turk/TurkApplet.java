@@ -49,8 +49,12 @@ public class TurkApplet extends JApplet implements MouseListener {
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
 		
-		String urlParam = getParameter("imgURL"),
-				defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
+		String urlParam;
+		try {
+			urlParam = getParameter("imgURL");
+		} catch (NullPointerException npe) { urlParam = null; }
+		
+		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
 		
