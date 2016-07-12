@@ -3,6 +3,7 @@ package org.neu.ccs.mechanical_turk;
 import java.applet.Applet;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
@@ -54,14 +55,10 @@ public class TurkApplet extends JApplet {
 		try {
 			DrawingPanel dp = new DrawingPanel(url);
 			getContentPane().add(dp);
+			setSize(dp.getPreferredSize());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	public void paint(Graphics g) {
-		super.paint(g);
 	}
 	
 	public void undo() {
@@ -70,7 +67,7 @@ public class TurkApplet extends JApplet {
 	}
 	
 	public ArrayList<String> getQueries() {
-		return queries;
+		return this.queries;
 	}
 	
 	public ArrayList<Pair> getBoxCoords() {
@@ -87,6 +84,7 @@ public class TurkApplet extends JApplet {
 		
 		public DrawingPanel() throws IOException {
 			this(null);
+			// TODO Auto-generated catch block
 		}
 		
 		public DrawingPanel(String url) throws IOException {
@@ -103,6 +101,7 @@ public class TurkApplet extends JApplet {
 			
 			imgW = bImg.getWidth();
 			imgH = bImg.getHeight();
+			setPreferredSize(new Dimension(imgW, imgH));
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
 			
 			Graphics g = img.getGraphics();
@@ -169,8 +168,6 @@ public class TurkApplet extends JApplet {
 				current = null;
 				drawToBackground();
 			}
-
-			
 		}
 		
 	}
