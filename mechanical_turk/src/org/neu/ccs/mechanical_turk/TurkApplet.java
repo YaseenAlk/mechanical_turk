@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 
 public class TurkApplet extends JApplet {
 	private URL imgURL;
+	private DrawingPanel dp;
 	
 	private ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
@@ -41,7 +42,23 @@ public class TurkApplet extends JApplet {
 	public void init() {	
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
+
+		//will we need to receive any parameters?
 		
+		try {
+			dp = new DrawingPanel(determineUrl());
+			getContentPane().add(dp);
+			setSize(dp.getPreferredSize());
+			setMinimumSize(dp.getPreferredSize());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		queries.add(null);
+		boxCoordinates.add(null);
+		undo();
+	}
+	
+	public String determineUrl() {
 		String urlParam;
 		try {
 			urlParam = getParameter("imgURL");
@@ -49,21 +66,21 @@ public class TurkApplet extends JApplet {
 		
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
-
-		//will we need to receive any parameters?
 		
-		try {
-			DrawingPanel dp = new DrawingPanel(url);
-			getContentPane().add(dp);
-			setSize(dp.getPreferredSize());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		return url;
 	}
 	
 	public void undo() {
 		boxCoordinates.remove(boxCoordinates.size()-1);
-		queries.remove(queries.size()-1);	
+		queries.remove(queries.size()-1);
+		try {
+			getContentPane().removeAll();
+			dp = new DrawingPanel(determineUrl());
+			getContentPane().add(dp);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		revalidate();
 	}
 	
 	public ArrayList<String> getQueries() {
@@ -72,6 +89,10 @@ public class TurkApplet extends JApplet {
 	
 	public ArrayList<Pair> getBoxCoords() {
 		return this.boxCoordinates;
+	}
+	
+	public void setUrl(String url) throws MalformedURLException {
+		imgURL = new URL(url);
 	}
 	
 	private class DrawingPanel extends JPanel {
@@ -96,7 +117,7 @@ public class TurkApplet extends JApplet {
 		}
 		
 		private void loadImage(String URL) throws IOException {
-			imgURL = new URL(URL);
+			setUrl(URL);
 			BufferedImage bImg = ImageIO.read(imgURL);
 			
 			imgW = bImg.getWidth();
@@ -106,6 +127,10 @@ public class TurkApplet extends JApplet {
 			
 			Graphics g = img.getGraphics();
 			g.drawImage(bImg, 0, 0, this);
+			for (Pair p : boxCoordinates) {
+				g.setColor(Color.green);
+				drawRect(g, p.getStart(), p.getEnd());
+			}
 		    g.dispose();
 		}
 		
