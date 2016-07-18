@@ -9,6 +9,10 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -16,10 +20,10 @@ public class GUI {
 
 	private JFrame frame;
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
-	private TurkApplet app;
 	private JButton btnNext, btnSubmit, btnUndo;
 	
 	private Thread listener;
+	private AppletContainer appContainer;
 	
 	/**
 	 * Launch the application.
@@ -53,8 +57,7 @@ public class GUI {
 		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		AppletContainer panel = new AppletContainer();
-		app = panel.getApp();
+		appContainer = new AppletContainer();
 		
 		btnNext = new JButton("Next");
 		
@@ -62,14 +65,20 @@ public class GUI {
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				submitted = true;
-				app.qualCoord();
+				appContainer.getApp().qualCoord();
+				try {
+					appContainer.exportData();
+				} catch (ParserConfigurationException | TransformerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		
 		btnUndo = new JButton("Undo");
 		btnUndo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				app.undo();
+				appContainer.getApp().undo();
 			}
 		});
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
@@ -78,7 +87,7 @@ public class GUI {
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+							.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
 							.addComponent(btnUndo))
 						.addGroup(groupLayout.createSequentialGroup()
@@ -93,7 +102,7 @@ public class GUI {
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(btnUndo)))
@@ -116,7 +125,7 @@ public class GUI {
 				}
 			}
 			private void updateButtons() {
-				undoSubmitLocked = app.getBoxCoords().size() < 1;
+				undoSubmitLocked = appContainer.getApp().getBoxCoords().size() < 1;
 				nextLocked = !submitted;//just for clean naming
 				
 				btnUndo.setEnabled(!undoSubmitLocked);
