@@ -197,7 +197,7 @@ public class TurkApplet extends JApplet {
 		
 	}
 	
-	private class Pair {
+	public class Pair {
 		private Point start;	// starting point (not necessarily top left)
 		private Point end; 		// ending point (not necessarily bottom right)
 		
