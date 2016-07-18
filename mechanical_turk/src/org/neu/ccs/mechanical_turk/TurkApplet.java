@@ -39,6 +39,8 @@ public class TurkApplet extends JApplet {
 	private ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
 	
+	public boolean qStage = true;
+	
 	public void init() {	
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
@@ -60,10 +62,18 @@ public class TurkApplet extends JApplet {
 	
 	public String determineUrl() {
 		String urlParam;
-		try {
+		try 
+		{
+			if(qStage)
+			{
+				urlParam = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRKw8tFPYyC_02MMpIZ2tbRF1nasGQCiYdPKBl1Z2XH2HlVi4hr";
+			}
+			else
+			{
 			urlParam = getParameter("imgURL");
+			}
+			
 		} catch (NullPointerException npe) { urlParam = null; }
-		
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
@@ -89,6 +99,31 @@ public class TurkApplet extends JApplet {
 	
 	public ArrayList<Pair> getBoxCoords() {
 		return this.boxCoordinates;
+	}
+	
+	public void qualCoord()
+	{
+		Point[] firstCoord = new Point[25];
+		Point[] secondCoord = new Point[25];
+		for (Pair p : this.getBoxCoords()) 
+		{
+			int x1 = 0; int y1 = 0;
+			int x2 = 10; int y2 = 10;
+			int allowance = 5;
+			for(int i = 0; i < allowance; i++)
+			{
+				for (int t = 0; t < allowance; t ++)
+				{
+				firstCoord[i * 5 + t] = new Point(x1 + i, y1 + t);
+				secondCoord[i * 5 + t] = new Point(x2 + i, y2 + t);		
+
+				//System.out.print(firstCoord[i * 5 + t]);
+				}
+			}
+			Point a = p.getStart();
+			Point b = p.getEnd();
+			
+		}
 	}
 	
 	public void setUrl(String url) throws MalformedURLException {

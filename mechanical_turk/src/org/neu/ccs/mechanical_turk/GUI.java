@@ -62,6 +62,7 @@ public class GUI {
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				submitted = true;
+				app.qualCoord();
 			}
 		});
 		
@@ -132,5 +133,4 @@ public class GUI {
 	    	}
 	    		
 	    }
-
 }
