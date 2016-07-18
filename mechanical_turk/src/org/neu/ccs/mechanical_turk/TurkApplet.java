@@ -95,6 +95,11 @@ public class TurkApplet extends JApplet {
 		imgURL = new URL(url);
 	}
 	
+	public String getImageID() {
+		//TODO: code image IDs
+		return "";
+	}
+	
 	private class DrawingPanel extends JPanel {
 		
 		private Point press, release, current;
