@@ -14,6 +14,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
@@ -56,8 +57,6 @@ public class GUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 407, 362);
-		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		appContainer = new AppletContainer();
@@ -69,8 +68,9 @@ public class GUI {
 			public void actionPerformed(ActionEvent e) {
 				submitted = true;
 				try {
+					appContainer.saveImage();
 					appContainer.exportData();
-				} catch (ParserConfigurationException | TransformerException e1) {
+				} catch (ParserConfigurationException | TransformerException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -118,6 +118,11 @@ public class GUI {
 		
 		frame.getContentPane().setLayout(groupLayout);
 		startListener();
+		
+		int x1 = 100 + appContainer.getBounds().width + btnSubmit.getBounds().width, 
+			y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height;
+		frame.setBounds(100, 100, x1, y1);
+		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 	}
 	
 	 private class Listener implements Runnable {
