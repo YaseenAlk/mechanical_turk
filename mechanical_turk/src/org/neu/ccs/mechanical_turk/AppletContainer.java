@@ -2,10 +2,13 @@ package org.neu.ccs.mechanical_turk;
 
 import java.applet.Applet;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilder;
@@ -96,5 +99,16 @@ public class AppletContainer extends JPanel {
 		transformer.transform(source, result);
 
 		System.out.println("File saved!");
+	}
+	
+	public void saveImage() throws IOException {
+		BufferedImage image = app.getImage();
+		File outputfile = new File("/home/ur5/exportedImage.png");
+	    ImageIO.write(image, "png", outputfile);
+	    
+	    BufferedImage unscaled = app.getUnscaledImage();
+		File unscaledFile = new File("/home/ur5/unscaledImage.png");
+	    ImageIO.write(unscaled, "png", unscaledFile);
+	    
 	}
 }

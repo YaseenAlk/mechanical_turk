@@ -11,6 +11,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,17 +65,17 @@ public class TurkApplet extends JApplet {
 		String urlParam;
 		try 
 		{
-			if(qStage)
-			{
-				urlParam = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRKw8tFPYyC_02MMpIZ2tbRF1nasGQCiYdPKBl1Z2XH2HlVi4hr";
-			}
-			else
-			{
+//			if(qStage)
+//			{
+//				urlParam = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRKw8tFPYyC_02MMpIZ2tbRF1nasGQCiYdPKBl1Z2XH2HlVi4hr";
+//			}
+//			else
+//			{
 			urlParam = getParameter("imgURL");
-			}
+//			}
 			
 		} catch (NullPointerException npe) { urlParam = null; }
-		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
+		String defaultUrl = "http://hdwallpaperia.com/wp-content/uploads/2014/01/Windows-3D-1920x1080-Wallpaper-Background.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
 		return url;
@@ -135,11 +136,40 @@ public class TurkApplet extends JApplet {
 		return "";
 	}
 	
+	public BufferedImage getImage() {
+		return dp.img;
+	}
+	
+	public BufferedImage getUnscaledImage() {
+		if (dp.scaledX || dp.scaledY) {
+			BufferedImage ret = dp.originalImg;
+			
+			Graphics g = ret.getGraphics();
+			for (Pair p : boxCoordinates) {
+				g.setColor(Color.green);
+				Point scaledStart = new Point((int)(p.getStart().getX() / dp.scalingFactorX), 
+						(int)(p.getStart().getY() / dp.scalingFactorY));
+				Point scaledEnd = new Point((int)(p.getEnd().getX() / dp.scalingFactorX), 
+						(int)(p.getEnd().getY() / dp.scalingFactorY));
+				
+				dp.drawRect(g, scaledStart, scaledEnd);
+			}
+		    g.dispose();
+		    
+		    
+		    return ret;
+		} else {
+			return dp.img;
+		}
+	}
+	
 	private class DrawingPanel extends JPanel {
 		
 		private Point press, release, current;
 
-		private BufferedImage img;
+		private BufferedImage img, originalImg;
+		private boolean scaledX, scaledY;
+		private double scalingFactorX, scalingFactorY; 
 		
 		private int imgW, imgH;
 		
@@ -159,7 +189,17 @@ public class TurkApplet extends JApplet {
 		private void loadImage(String URL) throws IOException {
 			setUrl(URL);
 			BufferedImage bImg = ImageIO.read(imgURL);
-			
+			originalImg = bImg;
+			if (bImg.getWidth() > 640) {
+				scaledX = true;
+				scalingFactorX = 640.0/bImg.getWidth();
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, 640, bImg.getHeight(), scalingFactorX, 1);
+			}
+			if (bImg.getHeight() > 480) {
+				scaledY = true;
+				scalingFactorY = 360.0/bImg.getHeight();
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, bImg.getWidth(), 360, 1, scalingFactorY);
+			}
 			imgW = bImg.getWidth();
 			imgH = bImg.getHeight();
 			setPreferredSize(new Dimension(imgW, imgH));
@@ -213,7 +253,31 @@ public class TurkApplet extends JApplet {
 		      press = null;
 		      
 		      repaint();
-		   }
+		}
+		
+		/**
+		 * Credit: A4L of StackOverflow (http://stackoverflow.com/questions/15558202)
+		 * 
+		 * scale image
+		 * 
+		 * @param sbi image to scale
+		 * @param imageType type of image
+		 * @param dWidth width of destination image
+		 * @param dHeight height of destination image
+		 * @param fWidth x-factor for transformation / scaling
+		 * @param fHeight y-factor for transformation / scaling
+		 * @return scaled image
+		 */
+		public BufferedImage scale(BufferedImage sbi, int imageType, int dWidth, int dHeight, double fWidth, double fHeight) {
+		    BufferedImage dbi = null;
+		    if(sbi != null) {
+		        dbi = new BufferedImage(dWidth, dHeight, imageType);
+		        Graphics2D g = dbi.createGraphics();
+		        AffineTransform at = AffineTransform.getScaleInstance(fWidth, fHeight);
+		        g.drawRenderedImage(sbi, at);
+		    }
+		    return dbi;
+		}
 		
 		private class MyMouseAdapter extends MouseAdapter {
 			@Override
