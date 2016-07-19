@@ -20,23 +20,28 @@ import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
 
-public class GUI {
+public class webGUI {
 
 	private JFrame frame;
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
+	private volatile static boolean certified;
 	private JButton btnNext, btnSubmit, btnUndo;
 	
 	private Thread listener;
-	private AppletContainer appContainer;
+	private WebAppletContainer appContainer;
 	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		//check the file to see if youre certified
+		//if the file exists, certified = true;
+		certified = false;
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUI window = new GUI();
+					webGUI window = new webGUI();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -48,7 +53,7 @@ public class GUI {
 	/**
 	 * Create the application.
 	 */
-	public GUI() {
+	public webGUI() {
 		initialize();
 	}
 
@@ -59,7 +64,7 @@ public class GUI {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		appContainer = new AppletContainer();
+		appContainer = new WebAppletContainer(certified);
 		
 		btnNext = new JButton("Next");
 		
@@ -73,6 +78,10 @@ public class GUI {
 				} catch (ParserConfigurationException | TransformerException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				}
+				
+				if (!certified) {
+					//save file
 				}
 			}
 		});

@@ -32,7 +32,7 @@ import javax.swing.JPanel;
  *
  */
 
-public class Qualification extends JApplet {
+public class Qualification extends TurkApplet {
 	private URL imgURL;
 	private DrawingPanel dp;
 
@@ -94,14 +94,6 @@ public class Qualification extends JApplet {
 		revalidate();
 	}
 
-	public ArrayList<String> getQueries() {
-		return this.queries;
-	}
-
-	public ArrayList<Pair> getBoxCoords() {
-		return this.boxCoordinates;
-	}
-
 	public void qualCoord()
 	{
 		//The 'designated' pixels- the ones that correctly make up the edge of the bounding box
@@ -111,7 +103,7 @@ public class Qualification extends JApplet {
 		//How many pixels that the user can be away from the 'designated' pixel
 		int allowance = 30;
 
-		for (Pair p : this.getBoxCoords()) 
+		for (Pair p : super.getBoxCoords()) 
 		{			
 			//The user's inputed coordinates
 			Point a = p.getStart();
@@ -261,24 +253,6 @@ public class Qualification extends JApplet {
 			}
 		}
 
-	}
-
-	public class Pair {
-		private Point start;	// starting point (not necessarily top left)
-		private Point end; 		// ending point (not necessarily bottom right)
-
-		public Pair(Point s, Point e) {
-			start = s;
-			end = e;
-		}
-
-		public Point getStart() {
-			return start;
-		}
-
-		public Point getEnd() {
-			return end;
-		}
 	}
 
 }
