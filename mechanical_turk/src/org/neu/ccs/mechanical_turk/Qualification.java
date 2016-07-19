@@ -105,8 +105,8 @@ public class Qualification extends JApplet {
 	public void qualCoord()
 	{
 		//The 'designated' pixels- the ones that correctly make up the edge of the bounding box
-		int x1 = 167; int y1 = 46;
-		int x2 = 303; int y2 = 48;
+		int x1 = 167; int y1 = (int) (46 / (360.0 / 490.0));
+		int x2 = 303; int y2 = (int) (48 / (360.0 / 490.0));
 
 		//How many pixels that the user can be away from the 'designated' pixel
 		int allowance = 30;
