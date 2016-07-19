@@ -15,6 +15,9 @@ import javax.xml.transform.TransformerException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
 
 public class GUI {
 
@@ -65,7 +68,6 @@ public class GUI {
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				submitted = true;
-				appContainer.getApp().qualCoord();
 				try {
 					appContainer.exportData();
 				} catch (ParserConfigurationException | TransformerException e1) {
@@ -88,13 +90,13 @@ public class GUI {
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
 							.addComponent(btnUndo))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addContainerGap(321, Short.MAX_VALUE)
+							.addContainerGap(329, Short.MAX_VALUE)
 							.addComponent(btnNext))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addContainerGap(321, Short.MAX_VALUE)
+							.addContainerGap(312, Short.MAX_VALUE)
 							.addComponent(btnSubmit)))
 					.addContainerGap())
 		);
@@ -106,12 +108,14 @@ public class GUI {
 						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(btnUndo)))
-					.addPreferredGap(ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
 					.addComponent(btnSubmit)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(btnNext)
 					.addContainerGap())
 		);
+		String textInitial = "Welcome";
+		
 		frame.getContentPane().setLayout(groupLayout);
 		startListener();
 	}
