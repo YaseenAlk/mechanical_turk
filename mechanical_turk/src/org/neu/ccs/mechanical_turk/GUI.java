@@ -32,7 +32,10 @@ public class GUI {
 	private AppletContainer appContainer;
 
 	private volatile static boolean certified; 
-	private boolean foundFile;
+	
+	private JLabel messLabel;
+	String messCert = "Certified user";
+	String messnCert = "Not a certified user";
 	/**
 	 * Launch the application.
 	 */
@@ -116,43 +119,54 @@ public class GUI {
 				appContainer.getApp().undo();
 			}
 		});
+		
+		//Label that shows user whether certified or not
+		messLabel = new JLabel(" ");
+		
+		
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
-				groupLayout.createParallelGroup(Alignment.TRAILING)
+			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
-										.addComponent(btnUndo))
-								.addGroup(groupLayout.createSequentialGroup()
-										.addContainerGap(329, Short.MAX_VALUE)
-										.addComponent(btnNext))
-								.addGroup(groupLayout.createSequentialGroup()
-										.addContainerGap(312, Short.MAX_VALUE)
-										.addComponent(btnSubmit)))
-						.addContainerGap())
-				);
-		groupLayout.setVerticalGroup(
-				groupLayout.createParallelGroup(Alignment.TRAILING)
-				.addGroup(groupLayout.createSequentialGroup()
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addContainerGap()
-										.addComponent(btnUndo)))
-						.addPreferredGap(ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
-						.addComponent(btnSubmit)
-						.addPreferredGap(ComponentPlacement.UNRELATED)
-						.addComponent(btnNext)
-						.addContainerGap())
-				);
+								.addComponent(messLabel))
+							.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(btnUndo))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addContainerGap(111, Short.MAX_VALUE)
+							.addComponent(btnNext))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addContainerGap(94, Short.MAX_VALUE)
+							.addComponent(btnSubmit)))
+					.addContainerGap())
+		);
+		groupLayout.setVerticalGroup(
+			groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addContainerGap(34, Short.MAX_VALUE)
+							.addComponent(messLabel)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(appContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(btnUndo)))
+					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+					.addComponent(btnSubmit)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(btnNext)
+					.addContainerGap())
+		);
 
 		frame.getContentPane().setLayout(groupLayout);
 		startListener();
 
 		int x1 = 100 + appContainer.getBounds().width + btnSubmit.getBounds().width, 
-				y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height;
+				y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height + messLabel.getHeight();
 		frame.setBounds(100, 100, x1, y1);
 		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 	}
@@ -161,15 +175,20 @@ public class GUI {
 
 		@Override
 		public void run() {
-			while (true) {
-				updateButtons();
+			boolean breaking = false;
+			while(!breaking){
 				if(certified)
 				{
-					//System.out.println("GUI thinks you are certified");
-					appContainer = new AppletContainer(certified);
+					breaking = true;
+					System.out.println("GUI thinks you are certified");
+					messLabel.setText(messCert);
 				}
 				else 
-					certified = appContainer.ruCertified();
+					//certified = appContainer.ruCertified();
+					messLabel.setText(messnCert);
+			}
+			while (true) {
+				updateButtons();
 			}
 		}
 		private void updateButtons() {

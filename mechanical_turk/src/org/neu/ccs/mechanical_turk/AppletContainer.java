@@ -41,7 +41,6 @@ public class AppletContainer extends JPanel {
 		{
 			app = new Qualification();
 			//System.out.println("Qual Japplet");
-			
 		}
 		app.init();
 		add(app);
