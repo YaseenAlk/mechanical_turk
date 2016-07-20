@@ -97,7 +97,8 @@ public class GUI {
 		if (loadFromXML) {
 			
 			try {
-				File fXmlFile = new File("/home/ur5/test.xml");
+				String xmlPath = System.getProperty("user.home");
+				File fXmlFile = new File(xmlPath + "/test.xml");
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder;
 				dBuilder = dbFactory.newDocumentBuilder();
