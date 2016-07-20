@@ -11,6 +11,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -41,12 +42,13 @@ public class TurkApplet extends JApplet {
 	
 	public boolean qStage = true;
 	
-	public void init() {	
-		boxCoordinates = new ArrayList<>();
-		queries = new ArrayList<>();
+	public void init() {
+		if (boxCoordinates == null)
+			boxCoordinates = new ArrayList<>();
+		if (queries == null)
+			queries = new ArrayList<>();
 
 		//will we need to receive any parameters?
-		
 		try {
 			dp = new DrawingPanel(determineUrl());
 			getContentPane().add(dp);
@@ -55,12 +57,10 @@ public class TurkApplet extends JApplet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		queries.add(null);
-		boxCoordinates.add(null);
-		undo();
 	}
 	
 	public String determineUrl() {
+		
 		String urlParam;
 		try 
 		{
@@ -73,7 +73,9 @@ public class TurkApplet extends JApplet {
 			urlParam = getParameter("imgURL");
 			}
 			
-		} catch (NullPointerException npe) { urlParam = null; }
+		} catch (NullPointerException npe) { 
+			urlParam = null; 
+		}
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
@@ -101,6 +103,44 @@ public class TurkApplet extends JApplet {
 		return this.boxCoordinates;
 	}
 	
+	public void setQueries(ArrayList<String> list) {
+		this.queries = list;
+	}
+	
+	public void setBoxCoords(ArrayList<Pair> list, boolean alreadyScaled) {
+		if (!alreadyScaled) {
+			//determine scaling factor based on current imgURL
+			double scaleFactorX, scaleFactorY;
+			try {
+				BufferedImage img = ImageIO.read(imgURL);
+				scaleFactorX = 640.0/img.getWidth();
+				scaleFactorY = 360.0/img.getHeight();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("setBoxCoords: Image loading failed");
+				scaleFactorX = 1;
+				scaleFactorY = 1;
+			}
+			//scale list here
+			for (int i = 0; i < list.size(); i++) {
+				Pair p = list.get(i);
+				Point oldStart = p.getStart(), oldEnd = p.getEnd();
+				double oldStartX = oldStart.getX(),
+					oldStartY = oldStart.getY(), 
+					oldEndX = oldEnd.getX(), 
+					oldEndY = oldEnd.getY();
+				Point newStart = new Point((int)(oldStartX*scaleFactorX), (int)(oldStartY*scaleFactorY)),
+					newEnd = new Point((int)(oldEndX*scaleFactorX), (int)(oldEndY*scaleFactorY));
+				list.set(i, new Pair(newStart, newEnd));
+			}
+		}
+		this.boxCoordinates = list;
+	}
+	
+	public URL getUrl() {
+		return imgURL;
+	}
+	
 	public void setUrl(String url) throws MalformedURLException {
 		imgURL = new URL(url);
 	}
@@ -110,11 +150,65 @@ public class TurkApplet extends JApplet {
 		return "";
 	}
 	
+	public BufferedImage getImage() {
+		//returns the scaled-down image
+		//not sure if this method will ever be necessary
+		return dp.img;
+	}
+	
+	/**
+	 * 
+	 * @return the original background image, with no bounding boxes
+	 */
+	public BufferedImage getOriginalImage() {
+		return dp.originalImg;
+	}
+	
+	/**
+	 * 
+	 * @return an unscaled version of the modified image, with bounding boxes
+	 */
+	public BufferedImage getUnscaledImage() {
+		if (dp.scaledX || dp.scaledY) {
+			BufferedImage ret = dp.originalImg;
+			
+			Graphics g = ret.getGraphics();
+			for (Pair p : getUnscaledBoxCoords()) {
+				g.setColor(Color.green);
+				System.out.println(p.getStart());
+				System.out.println(p.getEnd());
+				dp.drawRect(g, p.getStart(), p.getEnd());
+			}
+		    g.dispose();
+		    
+		    
+		    return ret;
+		} else {
+			return dp.img;
+		}
+	}
+	
+	public ArrayList<Pair> getUnscaledBoxCoords() {
+		ArrayList<Pair> ret = new ArrayList<Pair>();
+		for (Pair p : getBoxCoords()) {
+			Point scaledS = p.getStart();
+			Point unscaledS = new Point((int)(scaledS.getX()/dp.scalingFactorX), (int)(scaledS.getY()/dp.scalingFactorY));
+			
+			Point scaledE = p.getEnd();
+			Point unscaledE = new Point((int)(scaledE.getX()/dp.scalingFactorX), (int)(scaledE.getY()/dp.scalingFactorY));
+			ret.add(new Pair(unscaledS, unscaledE));
+		}
+		
+		return ret;
+	}
+	
 	private class DrawingPanel extends JPanel {
 		
 		private Point press, release, current;
 
-		private BufferedImage img;
+		private BufferedImage img, originalImg;
+		private boolean scaledX, scaledY;
+		private double scalingFactorX, scalingFactorY; 
 		
 		private int imgW, imgH;
 		
@@ -124,7 +218,12 @@ public class TurkApplet extends JApplet {
 		}
 		
 		public DrawingPanel(String url) throws IOException {
-			loadImage(url);
+			scalingFactorX = 1; //so that we don't divide by 0 in other cases
+			scalingFactorY = 1;
+			if (imgURL != null)
+				loadImage(imgURL.toString());
+			else
+				loadImage(url);
 			
 			MyMouseAdapter mma = new MyMouseAdapter();
 			addMouseMotionListener(mma);
@@ -134,7 +233,17 @@ public class TurkApplet extends JApplet {
 		private void loadImage(String URL) throws IOException {
 			setUrl(URL);
 			BufferedImage bImg = ImageIO.read(imgURL);
-			
+			originalImg = bImg;
+			if (bImg.getWidth() > 640) {
+				scaledX = true;
+				scalingFactorX = 640.0/bImg.getWidth();
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, 640, bImg.getHeight(), scalingFactorX, 1);
+			}
+			if (bImg.getHeight() > 480) {
+				scaledY = true;
+				scalingFactorY = 360.0/bImg.getHeight();
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, bImg.getWidth(), 360, 1, scalingFactorY);
+			}
 			imgW = bImg.getWidth();
 			imgH = bImg.getHeight();
 			setPreferredSize(new Dimension(imgW, imgH));
@@ -188,7 +297,31 @@ public class TurkApplet extends JApplet {
 		      press = null;
 		      
 		      repaint();
-		   }
+		}
+		
+		/**
+		 * Credit: A4L of StackOverflow (http://stackoverflow.com/questions/15558202)
+		 * 
+		 * scale image
+		 * 
+		 * @param sbi image to scale
+		 * @param imageType type of image
+		 * @param dWidth width of destination image
+		 * @param dHeight height of destination image
+		 * @param fWidth x-factor for transformation / scaling
+		 * @param fHeight y-factor for transformation / scaling
+		 * @return scaled image
+		 */
+		public BufferedImage scale(BufferedImage sbi, int imageType, int dWidth, int dHeight, double fWidth, double fHeight) {
+		    BufferedImage dbi = null;
+		    if(sbi != null) {
+		        dbi = new BufferedImage(dWidth, dHeight, imageType);
+		        Graphics2D g = dbi.createGraphics();
+		        AffineTransform at = AffineTransform.getScaleInstance(fWidth, fHeight);
+		        g.drawRenderedImage(sbi, at);
+		    }
+		    return dbi;
+		}
 		
 		private class MyMouseAdapter extends MouseAdapter {
 			@Override
