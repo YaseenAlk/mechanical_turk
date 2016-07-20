@@ -40,65 +40,20 @@ import org.neu.ccs.mechanical_turk.TurkApplet.Pair;
  *
  */
 
-public class Qualification extends JApplet {
-	private URL imgURL;
-	private DrawingPanel dp;
-
-	private ArrayList<Pair> boxCoordinates;
-	private ArrayList<String> queries;
+public class Qualification extends TurkApplet {
 
 	public boolean qStage = true;
 	public boolean certified = false;
 
 	@Override
 	public void init() {
-		boxCoordinates = new ArrayList<>();
-		queries = new ArrayList<>();
-
-		// will we need to receive any parameters?
-
 		try {
-			dp = new DrawingPanel(determineUrl());
-			getContentPane().add(dp);
-			setSize(dp.getPreferredSize());
-			setMinimumSize(dp.getPreferredSize());
-		} catch (IOException e) {
+			super.setUrl("http://st.hzcdn.com/simgs/1f418e7904ff0974_4-6626/contemporary-desks-and-hutches.jpg");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		queries.add(null);
-		boxCoordinates.add(null);
-		undo();
-	}
-
-	public String determineUrl() {
-		String urlParam;
-		try {
-			if (qStage) {
-				urlParam = "http://st.hzcdn.com/simgs/1f418e7904ff0974_4-6626/contemporary-desks-and-hutches.jpg";
-			} else {
-				urlParam = getParameter("imgURL");
-			}
-
-		} catch (NullPointerException npe) {
-			urlParam = null;
-		}
-		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
-				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
-
-		return url;
-	}
-
-	public void undo() {
-		boxCoordinates.remove(boxCoordinates.size() - 1);
-		queries.remove(queries.size() - 1);
-		try {
-			getContentPane().removeAll();
-			dp = new DrawingPanel(determineUrl());
-			getContentPane().add(dp);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		revalidate();
+		super.init();
 	}
 
 	public void qualCoord() throws UnsupportedEncodingException, FileNotFoundException, IOException
@@ -109,7 +64,6 @@ public class Qualification extends JApplet {
 
 		//How many pixels that the user can be away from the 'designated' pixel
 		int allowance = 30;
-		System.out.println(getBoxCoords());
 		for (Pair p : this.getBoxCoords()) 
 		{			
 			//The user's inputed coordinates
@@ -143,144 +97,4 @@ public class Qualification extends JApplet {
 			}
 		}
 	}
-
-	public String getPassword() {
-		String password = "certified";
-		return password;
-	}
-
-	public void setUrl(String url) throws MalformedURLException {
-		imgURL = new URL(url);
-	}
-
-	public String getImageID() {
-		// TODO: code image IDs
-		return "";
-	}
-
-	private class DrawingPanel extends JPanel {
-
-		private Point press, release, current;
-
-		private BufferedImage img;
-
-		private int imgW, imgH;
-
-		public DrawingPanel(String url) throws IOException {
-			loadImage(url);
-
-			MyMouseAdapter mma = new MyMouseAdapter();
-			addMouseMotionListener(mma);
-			addMouseListener(mma);
-		}
-
-		private void loadImage(String URL) throws IOException {
-			setUrl(URL);
-			BufferedImage bImg = ImageIO.read(imgURL);
-
-			imgW = bImg.getWidth();
-			imgH = bImg.getHeight();
-			setPreferredSize(new Dimension(imgW, imgH));
-			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
-
-			Graphics g = img.getGraphics();
-			g.drawImage(bImg, 0, 0, this);
-			for (Pair p : boxCoordinates) {
-				g.setColor(Color.green);
-				drawRect(g, p.getStart(), p.getEnd());
-			}
-			g.dispose();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			if (img != null) {
-				g.drawImage(img, 0, 0, this);
-			}
-
-			if (press != null && current != null) {
-				g.setColor(Color.blue);
-				drawRect(g, press, current);
-			}
-		}
-
-		private void drawRect(Graphics g, Point start, Point end) {
-			Point press = start, release = end;
-			int topLeftX = (int) Math.min(press.getX(), release.getX()),
-					topLeftY = (int) Math.min(press.getY(), release.getY()),
-					width = (int) Math.abs(press.getX() - release.getX()),
-					height = (int) Math.abs(press.getY() - release.getY());
-
-			Graphics2D g2 = (Graphics2D) g;
-			g2.setStroke(new BasicStroke(3));
-			g.drawRect(topLeftX, topLeftY, width, height);
-
-		}
-
-		public void drawToBackground() {
-			Graphics g = img.getGraphics();
-			g.setColor(Color.green);
-			drawRect(g, press, release);
-			g.dispose();
-
-			String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
-			queries.add(query);
-			boxCoordinates.add(new Pair(press, release));
-			System.out.println(boxCoordinates);
-			press = null;
-
-			repaint();
-		}
-
-		private class MyMouseAdapter extends MouseAdapter {
-			@Override
-			public void mouseDragged(MouseEvent mEvt) {
-				current = mEvt.getPoint();
-				DrawingPanel.this.repaint();
-			}
-
-			@Override
-			public void mousePressed(MouseEvent mEvt) {
-				press = mEvt.getPoint();
-				System.out.println("Press " + press);
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent mEvt) {
-				release = mEvt.getPoint();
-				System.out.println("Release " + release);
-				current = null;
-				drawToBackground();
-			}
-		}
-
-	}
-
-	public ArrayList<String> getQueries() {
-		return this.queries;
-	}
-
-	public ArrayList<Pair> getBoxCoords() {
-		return this.boxCoordinates;
-	}
-
-	public class Pair {
-		private Point start; // starting point (not necessarily top left)
-		private Point end; // ending point (not necessarily bottom right)
-
-		public Pair(Point s, Point e) {
-			start = s;
-			end = e;
-		}
-
-		public Point getStart() {
-			return start;
-		}
-
-		public Point getEnd() {
-			return end;
-		}
-	}
-
 }

@@ -14,6 +14,8 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -29,10 +31,29 @@ public class GUI {
 	private Thread listener;
 	private AppletContainer appContainer;
 	
+	private volatile boolean certified; 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		//Check if certified
+		File dir = new File("C:");
+	      FilenameFilter filter = new FilenameFilter() {
+	         public boolean accept
+	         (File dir, String name) {
+	            return name.startsWith("b");
+	        }
+	      };
+	      String[] children = dir.list(filter);
+	      if (children == null) {
+	         System.out.println("Either dir does not exist or is not a directory");
+	      } 
+	      else {
+	         for (int i=0; i < children.length; i++) {
+	            String filename = children[i];
+	            System.out.println(filename);
+	         }
+	      } 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -59,7 +80,7 @@ public class GUI {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		appContainer = new AppletContainer();
+		appContainer = new AppletContainer(certified);
 		
 		btnNext = new JButton("Next");
 		

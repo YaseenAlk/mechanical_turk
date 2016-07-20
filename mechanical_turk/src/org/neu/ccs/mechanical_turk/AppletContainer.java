@@ -28,8 +28,17 @@ public class AppletContainer extends JPanel {
 
 	private TurkApplet app;
 	
-	public AppletContainer() {
-		app = new TurkApplet();
+	public AppletContainer(boolean certified) {
+		if (certified)
+		{
+			app = new TurkApplet();
+			System.out.println("Turk");
+		}
+		else
+		{
+			app = new Qualification();
+			System.out.println("Qual Japplet");
+		}
 		app.init();
 		add(app);
 		System.out.println("Yes! Size: " + app.getSize());
