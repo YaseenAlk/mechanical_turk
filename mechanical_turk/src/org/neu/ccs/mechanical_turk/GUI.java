@@ -30,7 +30,7 @@ public class GUI {
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
 	private JButton btnNext, btnSubmit, btnUndo;
 	
-	private static final boolean loadFromXML = true;
+	private static final boolean loadFromXML = false;
 	
 	private Thread listener;
 	private AppletContainer appContainer;
@@ -97,7 +97,8 @@ public class GUI {
 		if (loadFromXML) {
 			
 			try {
-				File fXmlFile = new File("/home/ur5/test.xml");
+				String xmlPath = System.getProperty("user.home");
+				File fXmlFile = new File(xmlPath + "/test.xml");
 				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder dBuilder;
 				dBuilder = dbFactory.newDocumentBuilder();
