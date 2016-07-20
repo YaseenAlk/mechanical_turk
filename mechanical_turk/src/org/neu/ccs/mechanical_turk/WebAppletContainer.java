@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 
 public class WebAppletContainer extends JPanel {
 
-	private TurkApplet app;
+	private Applet app = new Applet();
 	
 	public WebAppletContainer(boolean certified) {
 		if (certified)
@@ -40,13 +40,13 @@ public class WebAppletContainer extends JPanel {
 		setVisible(true);
 	}
 	
-	public TurkApplet getApp() {
+	public Applet getApp() {
 		return app;
 	}
 	
 	public void exportData() throws ParserConfigurationException, TransformerException {
-		ArrayList<Pair> boxCoords = app.getBoxCoords();
-		ArrayList<String> queries = app.getQueries();
+		ArrayList<Pair> boxCoords = ((TurkApplet) app).getBoxCoords();
+		ArrayList<String> queries = ((TurkApplet) app).getQueries();
 		
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		
@@ -63,7 +63,7 @@ public class WebAppletContainer extends JPanel {
 					
 		// set attribute to id element
 		Attr number = doc.createAttribute("id_number");
-		number.setValue(app.getImageID());		//TODO: code image ID system
+		number.setValue(((TurkApplet) app).getImageID());		//TODO: code image ID system
 		id.setAttributeNode(number);
 		
 		Element boxContainer = doc.createElement("boxes");

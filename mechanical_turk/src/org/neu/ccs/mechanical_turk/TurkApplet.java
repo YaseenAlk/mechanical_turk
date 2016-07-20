@@ -36,7 +36,7 @@ public class TurkApplet extends JApplet {
 	private URL imgURL;
 	private DrawingPanel dp;
 	
-	private ArrayList<Pair> boxCoordinates;
+	public ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
 	
 	public boolean qStage = true;

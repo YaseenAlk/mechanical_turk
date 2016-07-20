@@ -12,8 +12,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,6 +31,8 @@ import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.neu.ccs.mechanical_turk.TurkApplet.Pair;
+
 /**
  * 
  * @author Yaseen Alkhafaji <alkhafaji.yaseen@gmail.com>
@@ -32,7 +40,7 @@ import javax.swing.JPanel;
  *
  */
 
-public class Qualification extends TurkApplet {
+public class Qualification extends JApplet {
 	private URL imgURL;
 	private DrawingPanel dp;
 
@@ -42,11 +50,12 @@ public class Qualification extends TurkApplet {
 	public boolean qStage = true;
 	public boolean certified = false;
 
-	public void init() {	
+	@Override
+	public void init() {
 		boxCoordinates = new ArrayList<>();
 		queries = new ArrayList<>();
 
-		//will we need to receive any parameters?
+		// will we need to receive any parameters?
 
 		try {
 			dp = new DrawingPanel(determineUrl());
@@ -63,18 +72,16 @@ public class Qualification extends TurkApplet {
 
 	public String determineUrl() {
 		String urlParam;
-		try 
-		{
-			if(qStage)
-			{
+		try {
+			if (qStage) {
 				urlParam = "http://st.hzcdn.com/simgs/1f418e7904ff0974_4-6626/contemporary-desks-and-hutches.jpg";
-			}
-			else
-			{
+			} else {
 				urlParam = getParameter("imgURL");
 			}
 
-		} catch (NullPointerException npe) { urlParam = null; }
+		} catch (NullPointerException npe) {
+			urlParam = null;
+		}
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 
@@ -82,8 +89,8 @@ public class Qualification extends TurkApplet {
 	}
 
 	public void undo() {
-		boxCoordinates.remove(boxCoordinates.size()-1);
-		queries.remove(queries.size()-1);
+		boxCoordinates.remove(boxCoordinates.size() - 1);
+		queries.remove(queries.size() - 1);
 		try {
 			getContentPane().removeAll();
 			dp = new DrawingPanel(determineUrl());
@@ -94,7 +101,7 @@ public class Qualification extends TurkApplet {
 		revalidate();
 	}
 
-	public void qualCoord()
+	public void qualCoord() throws UnsupportedEncodingException, FileNotFoundException, IOException
 	{
 		//The 'designated' pixels- the ones that correctly make up the edge of the bounding box
 		int x1 = 167; int y1 = (int) (46 / (360.0 / 490.0));
@@ -102,18 +109,20 @@ public class Qualification extends TurkApplet {
 
 		//How many pixels that the user can be away from the 'designated' pixel
 		int allowance = 30;
-
-		for (Pair p : super.getBoxCoords()) 
+		System.out.println(getBoxCoords());
+		for (Pair p : this.getBoxCoords()) 
 		{			
 			//The user's inputed coordinates
 			Point a = p.getStart();
+
+			System.out.println(a);
 			int firstX = (int) a.getX();
 			int firstY = (int) a.getY();
-			
+
 			Point b = p.getEnd();
 			int secX = (int) b.getX();
 			int secY = (int) b.getY();
-			
+
 			//Ensures that no matter where the user draws their first coordinate, 
 			//it always reverts back to the top left of the rectangle
 			//and that the end coordinate is always the bottom right
@@ -121,22 +130,21 @@ public class Qualification extends TurkApplet {
 			int topLeftY = Math.min(firstY,secY);
 			int bottomRightX = Math.max(firstX, secX);
 			int bottomRightY = Math.min(firstY,secY);
-			
+
 			//Used to find if coordinates within the allowance
 			if(((topLeftX >= x1 - allowance) && (topLeftX <= x1 + allowance)) &&
-			   ((topLeftY >= y1 - allowance) && (topLeftY <= y1 + allowance)) &&
-			   ((bottomRightX >= x2 - allowance) && (bottomRightX <= x2 + allowance)) &&
-			   ((bottomRightY >= y2 - allowance) && (bottomRightY <= y2 + allowance))
-			   )
+					((topLeftY >= y1 - allowance) && (topLeftY <= y1 + allowance)) &&
+					((bottomRightX >= x2 - allowance) && (bottomRightX <= x2 + allowance)) &&
+					((bottomRightY >= y2 - allowance) && (bottomRightY <= y2 + allowance))
+					)
 			{
 				certified = true;
 				System.out.println("Certified");
 			}
 		}
 	}
-	
-	public String getPassword()
-	{
+
+	public String getPassword() {
 		String password = "certified";
 		return password;
 	}
@@ -146,7 +154,7 @@ public class Qualification extends TurkApplet {
 	}
 
 	public String getImageID() {
-		//TODO: code image IDs
+		// TODO: code image IDs
 		return "";
 	}
 
@@ -157,11 +165,6 @@ public class Qualification extends TurkApplet {
 		private BufferedImage img;
 
 		private int imgW, imgH;
-
-		public DrawingPanel() throws IOException {
-			this(null);
-			// TODO Auto-generated catch block
-		}
 
 		public DrawingPanel(String url) throws IOException {
 			loadImage(url);
@@ -224,7 +227,7 @@ public class Qualification extends TurkApplet {
 			String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
 			queries.add(query);
 			boxCoordinates.add(new Pair(press, release));
-
+			System.out.println(boxCoordinates);
 			press = null;
 
 			repaint();
@@ -249,10 +252,35 @@ public class Qualification extends TurkApplet {
 				System.out.println("Release " + release);
 				current = null;
 				drawToBackground();
-				qualCoord();
 			}
 		}
 
+	}
+
+	public ArrayList<String> getQueries() {
+		return this.queries;
+	}
+
+	public ArrayList<Pair> getBoxCoords() {
+		return this.boxCoordinates;
+	}
+
+	public class Pair {
+		private Point start; // starting point (not necessarily top left)
+		private Point end; // ending point (not necessarily bottom right)
+
+		public Pair(Point s, Point e) {
+			start = s;
+			end = e;
+		}
+
+		public Point getStart() {
+			return start;
+		}
+
+		public Point getEnd() {
+			return end;
+		}
 	}
 
 }
