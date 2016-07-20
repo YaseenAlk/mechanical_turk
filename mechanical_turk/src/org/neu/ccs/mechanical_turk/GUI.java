@@ -30,7 +30,7 @@ public class GUI {
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
 	private JButton btnNext, btnSubmit, btnUndo;
 	
-	private static final boolean loadFromXML = true;
+	private static final boolean loadFromXML = false;
 	
 	private Thread listener;
 	private AppletContainer appContainer;
