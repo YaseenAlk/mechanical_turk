@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -64,7 +65,7 @@ public class Qualification extends TurkApplet {
 
 		//How many pixels that the user can be away from the 'designated' pixel
 		int allowance = 30;
-		for (Pair p : this.getBoxCoords()) 
+		for (Pair p : super.getBoxCoords()) 
 		{			
 			//The user's inputed coordinates
 			Point a = p.getStart();
@@ -94,6 +95,24 @@ public class Qualification extends TurkApplet {
 			{
 				certified = true;
 				System.out.println("Certified");
+
+				try {
+					String userPath = (System.getProperty("user.home"));
+					File file = new File(userPath + "/Downloads/amzBBcertified");
+					System.out.println(file);
+
+					if (file.createNewFile()){
+						System.out.println("File is created!");
+					}else{
+						System.out.println("File already exists.");
+					}
+
+				} catch (IOException e) {
+					System.out.println("failed to create file");
+					e.printStackTrace();
+				}
+			}else{
+				System.out.println("you are not certified");
 			}
 		}
 	}

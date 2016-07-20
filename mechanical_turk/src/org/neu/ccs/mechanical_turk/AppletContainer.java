@@ -3,7 +3,10 @@ package org.neu.ccs.mechanical_turk;
 import java.applet.Applet;
 import java.awt.Point;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -32,20 +35,34 @@ public class AppletContainer extends JPanel {
 		if (certified)
 		{
 			app = new TurkApplet();
-			System.out.println("Turk");
+			//System.out.println("Turk");
 		}
 		else
 		{
 			app = new Qualification();
-			System.out.println("Qual Japplet");
+			//System.out.println("Qual Japplet");
+			
 		}
 		app.init();
 		add(app);
-		System.out.println("Yes! Size: " + app.getSize());
+		//System.out.println("Yes! Size: " + app.getSize());
 		setSize(app.getSize());
 		setVisible(true);
 	}
-	
+	public void Qualify()
+	{
+		try {
+			((Qualification) app).qualCoord();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+	}
+	public boolean ruCertified()
+	{
+		return ((Qualification) app).certified;
+	}
 	public TurkApplet getApp() {
 		return app;
 	}
