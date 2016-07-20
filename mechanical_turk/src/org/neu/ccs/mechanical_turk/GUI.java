@@ -7,13 +7,16 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.w3c.dom.Document;
+
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
 
@@ -22,6 +25,8 @@ public class GUI {
 	private JFrame frame;
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
 	private JButton btnNext, btnSubmit, btnUndo;
+	
+	private static final boolean loadFromXML = true;
 	
 	private Thread listener;
 	private AppletContainer appContainer;
@@ -40,6 +45,8 @@ public class GUI {
 				}
 			}
 		});
+
+		
 	}
 
 	/**
@@ -56,7 +63,26 @@ public class GUI {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		appContainer = new AppletContainer();
+		if (loadFromXML) {
+			
+			try {
+				File fXmlFile = new File("/home/ur5/test.xml");
+				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder dBuilder;
+				dBuilder = dbFactory.newDocumentBuilder();
+				Document doc = dBuilder.parse(fXmlFile);
+				
+				doc.getDocumentElement().normalize();
+				System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+				
+				appContainer = new AppletContainer(doc.getDocumentElement());
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		} else
+			appContainer = new AppletContainer();
 		
 		btnNext = new JButton("Next");
 		
@@ -115,7 +141,7 @@ public class GUI {
 		startListener();
 		
 		int x1 = 100 + appContainer.getBounds().width + btnSubmit.getBounds().width, 
-			y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height;
+			y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height + btnNext.getBounds().height;
 		frame.setBounds(100, 100, x1, y1);
 		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 	}

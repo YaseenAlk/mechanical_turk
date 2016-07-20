@@ -42,12 +42,13 @@ public class TurkApplet extends JApplet {
 	
 	public boolean qStage = true;
 	
-	public void init() {	
-		boxCoordinates = new ArrayList<>();
-		queries = new ArrayList<>();
+	public void init() {
+		if (boxCoordinates == null)
+			boxCoordinates = new ArrayList<>();
+		if (queries == null)
+			queries = new ArrayList<>();
 
 		//will we need to receive any parameters?
-		
 		try {
 			dp = new DrawingPanel(determineUrl());
 			getContentPane().add(dp);
@@ -56,25 +57,18 @@ public class TurkApplet extends JApplet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		queries.add(null);
-		boxCoordinates.add(null);
-		undo();
 	}
 	
 	public String determineUrl() {
+		
 		String urlParam;
 		try 
 		{
-//			if(qStage)
-//			{
-//				urlParam = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRKw8tFPYyC_02MMpIZ2tbRF1nasGQCiYdPKBl1Z2XH2HlVi4hr";
-//			}
-//			else
-//			{
-			urlParam = getParameter("imgURL");
-//			}
-			
-		} catch (NullPointerException npe) { urlParam = null; }
+			urlParam = getParameter("imgURL");	
+		} catch (NullPointerException npe) { 
+			urlParam = null; 
+		}
+		
 		String defaultUrl = "http://hdwallpaperia.com/wp-content/uploads/2014/01/Windows-3D-1920x1080-Wallpaper-Background.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
@@ -102,29 +96,42 @@ public class TurkApplet extends JApplet {
 		return this.boxCoordinates;
 	}
 	
-	public void qualCoord()
-	{
-		Point[] firstCoord = new Point[25];
-		Point[] secondCoord = new Point[25];
-		for (Pair p : this.getBoxCoords()) 
-		{
-			int x1 = 0; int y1 = 0;
-			int x2 = 10; int y2 = 10;
-			int allowance = 5;
-			for(int i = 0; i < allowance; i++)
-			{
-				for (int t = 0; t < allowance; t ++)
-				{
-				firstCoord[i * 5 + t] = new Point(x1 + i, y1 + t);
-				secondCoord[i * 5 + t] = new Point(x2 + i, y2 + t);		
-
-				//System.out.print(firstCoord[i * 5 + t]);
-				}
+	public void setQueries(ArrayList<String> list) {
+		this.queries = list;
+	}
+	
+	public void setBoxCoords(ArrayList<Pair> list, boolean alreadyScaled) {
+		if (!alreadyScaled) {
+			//determine scaling factor based on current imgURL
+			double scaleFactorX, scaleFactorY;
+			try {
+				BufferedImage img = ImageIO.read(imgURL);
+				scaleFactorX = 640.0/img.getWidth();
+				scaleFactorY = 360.0/img.getHeight();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("setBoxCoords: Image loading failed");
+				scaleFactorX = 1;
+				scaleFactorY = 1;
 			}
-			Point a = p.getStart();
-			Point b = p.getEnd();
-			
+			//scale list here
+			for (int i = 0; i < list.size(); i++) {
+				Pair p = list.get(i);
+				Point oldStart = p.getStart(), oldEnd = p.getEnd();
+				double oldStartX = oldStart.getX(),
+					oldStartY = oldStart.getY(), 
+					oldEndX = oldEnd.getX(), 
+					oldEndY = oldEnd.getY();
+				Point newStart = new Point((int)(oldStartX*scaleFactorX), (int)(oldStartY*scaleFactorY)),
+					newEnd = new Point((int)(oldEndX*scaleFactorX), (int)(oldEndY*scaleFactorY));
+				list.set(i, new Pair(newStart, newEnd));
+			}
 		}
+		this.boxCoordinates = list;
+	}
+	
+	public URL getUrl() {
+		return imgURL;
 	}
 	
 	public void setUrl(String url) throws MalformedURLException {
@@ -137,22 +144,33 @@ public class TurkApplet extends JApplet {
 	}
 	
 	public BufferedImage getImage() {
+		//returns the scaled-down image
+		//not sure if this method will ever be necessary
 		return dp.img;
 	}
 	
+	/**
+	 * 
+	 * @return the original background image, with no bounding boxes
+	 */
+	public BufferedImage getOriginalImage() {
+		return dp.originalImg;
+	}
+	
+	/**
+	 * 
+	 * @return an unscaled version of the modified image, with bounding boxes
+	 */
 	public BufferedImage getUnscaledImage() {
 		if (dp.scaledX || dp.scaledY) {
 			BufferedImage ret = dp.originalImg;
 			
 			Graphics g = ret.getGraphics();
-			for (Pair p : boxCoordinates) {
+			for (Pair p : getUnscaledBoxCoords()) {
 				g.setColor(Color.green);
-				Point scaledStart = new Point((int)(p.getStart().getX() / dp.scalingFactorX), 
-						(int)(p.getStart().getY() / dp.scalingFactorY));
-				Point scaledEnd = new Point((int)(p.getEnd().getX() / dp.scalingFactorX), 
-						(int)(p.getEnd().getY() / dp.scalingFactorY));
-				
-				dp.drawRect(g, scaledStart, scaledEnd);
+				System.out.println(p.getStart());
+				System.out.println(p.getEnd());
+				dp.drawRect(g, p.getStart(), p.getEnd());
 			}
 		    g.dispose();
 		    
@@ -161,6 +179,20 @@ public class TurkApplet extends JApplet {
 		} else {
 			return dp.img;
 		}
+	}
+	
+	public ArrayList<Pair> getUnscaledBoxCoords() {
+		ArrayList<Pair> ret = new ArrayList<Pair>();
+		for (Pair p : getBoxCoords()) {
+			Point scaledS = p.getStart();
+			Point unscaledS = new Point((int)(scaledS.getX()/dp.scalingFactorX), (int)(scaledS.getY()/dp.scalingFactorY));
+			
+			Point scaledE = p.getEnd();
+			Point unscaledE = new Point((int)(scaledE.getX()/dp.scalingFactorX), (int)(scaledE.getY()/dp.scalingFactorY));
+			ret.add(new Pair(unscaledS, unscaledE));
+		}
+		
+		return ret;
 	}
 	
 	private class DrawingPanel extends JPanel {
@@ -179,7 +211,12 @@ public class TurkApplet extends JApplet {
 		}
 		
 		public DrawingPanel(String url) throws IOException {
-			loadImage(url);
+			scalingFactorX = 1; //so that we don't divide by 0 in other cases
+			scalingFactorY = 1;
+			if (imgURL != null)
+				loadImage(imgURL.toString());
+			else
+				loadImage(url);
 			
 			MyMouseAdapter mma = new MyMouseAdapter();
 			addMouseMotionListener(mma);
