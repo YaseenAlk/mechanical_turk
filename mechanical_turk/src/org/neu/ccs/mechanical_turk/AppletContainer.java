@@ -1,11 +1,9 @@
 package org.neu.ccs.mechanical_turk;
 
-import java.applet.Applet;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,14 +11,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -51,6 +46,38 @@ public class AppletContainer extends JPanel {
 		setVisible(true);
 	}
 	
+	public AppletContainer(boolean certified) {
+		if (certified)
+		{
+			app = new TurkApplet();
+			//System.out.println("Turk");
+		}
+		else
+		{
+			app = new Qualification();
+			//System.out.println("Qual Japplet");
+			
+		}
+		app.init();
+		add(app);
+		setSize(app.getSize());
+		setVisible(true);
+	}
+	
+	public void Qualify()
+	{
+		try {
+			((Qualification) app).qualCoord();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+	}
+	public boolean ruCertified()
+	{
+		return ((Qualification) app).certified;
+	}
 	public TurkApplet getApp() {
 		return app;
 	}

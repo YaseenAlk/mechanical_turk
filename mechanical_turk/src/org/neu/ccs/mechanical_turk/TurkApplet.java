@@ -37,7 +37,7 @@ public class TurkApplet extends JApplet {
 	private URL imgURL;
 	private DrawingPanel dp;
 	
-	private ArrayList<Pair> boxCoordinates;
+	public ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
 	
 	public boolean qStage = true;
@@ -64,12 +64,19 @@ public class TurkApplet extends JApplet {
 		String urlParam;
 		try 
 		{
-			urlParam = getParameter("imgURL");	
+			if(qStage)
+			{
+				urlParam = "http://st.hzcdn.com/simgs/1f418e7904ff0974_4-6626/contemporary-desks-and-hutches.jpg";
+			}
+			else
+			{
+			urlParam = getParameter("imgURL");
+			}
+			
 		} catch (NullPointerException npe) { 
 			urlParam = null; 
 		}
-		
-		String defaultUrl = "http://hdwallpaperia.com/wp-content/uploads/2014/01/Windows-3D-1920x1080-Wallpaper-Background.jpg",
+		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 		
 		return url;
