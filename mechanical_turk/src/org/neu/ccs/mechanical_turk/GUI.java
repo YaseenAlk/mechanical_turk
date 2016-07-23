@@ -18,10 +18,7 @@ import org.w3c.dom.Document;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.awt.event.ActionEvent;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
 import javax.swing.JLabel;
 
 public class GUI {
@@ -45,7 +42,7 @@ public class GUI {
 	 */
 	public static void main(String[] args) {
 
-		//Check if certified
+		//Check if certified by whether their exists a file previously downloaded by the program
 		String userPath = (System.getProperty("user.home"));
 		File dir = new File(userPath+ "/Downloads");
 		FilenameFilter filter = new FilenameFilter() {
@@ -115,7 +112,8 @@ public class GUI {
 			
 		} else
 			appContainer = new AppletContainer(certified);
-
+		
+		//Buttons
 		btnNext = new JButton("Next");
 
 		btnSubmit = new JButton("Submit");
@@ -127,9 +125,11 @@ public class GUI {
 					{
 						//appContainer.saveImage();
 						appContainer.exportData();
+						btnSubmit.setEnabled(true);
 					} 
 					else
 					{
+						btnSubmit.setEnabled(false);
 						appContainer.Qualify();
 					}
 				} catch (ParserConfigurationException | TransformerException e1) {
@@ -191,9 +191,8 @@ public class GUI {
 		frame.getContentPane().setLayout(groupLayout);
 		startListener();
 		
-		int x1 = 100 + appContainer.getBounds().width + btnSubmit.getBounds().width, 
-			y1 = 100 + appContainer.getBounds().height + btnSubmit.getBounds().height + messLabel.getHeight();
-
+		int x1 = (int) (1.5 * (appContainer.getBounds().width + btnSubmit.getBounds().width)), 
+			y1 = (int) (1.75 * (appContainer.getBounds().height + btnSubmit.getBounds().height + messLabel.getBounds().height));
 		frame.setBounds(100, 100, x1, y1);
 		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
 	}

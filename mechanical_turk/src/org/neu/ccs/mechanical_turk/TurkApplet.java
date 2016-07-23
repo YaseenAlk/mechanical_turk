@@ -1,25 +1,19 @@
 package org.neu.ccs.mechanical_turk;
 
-import java.applet.Applet;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.JApplet;
@@ -36,12 +30,14 @@ import javax.swing.JPanel;
 public class TurkApplet extends JApplet {
 	private URL imgURL;
 	private DrawingPanel dp;
-	
+
 	public ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
-	
+
 	public boolean qStage = true;
-	
+
+	public double scaleFactorX, scaleFactorY;
+
 	public void init() {
 		if (boxCoordinates == null)
 			boxCoordinates = new ArrayList<>();
@@ -58,9 +54,9 @@ public class TurkApplet extends JApplet {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String determineUrl() {
-		
+
 		String urlParam;
 		try 
 		{
@@ -70,18 +66,18 @@ public class TurkApplet extends JApplet {
 			}
 			else
 			{
-			urlParam = getParameter("imgURL");
+				urlParam = getParameter("imgURL");
 			}
-			
+
 		} catch (NullPointerException npe) { 
 			urlParam = null; 
 		}
 		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
-		
+
 		return url;
 	}
-	
+
 	public void undo() {
 		boxCoordinates.remove(boxCoordinates.size()-1);
 		queries.remove(queries.size()-1);
@@ -94,27 +90,27 @@ public class TurkApplet extends JApplet {
 		}
 		revalidate();
 	}
-	
+
 	public ArrayList<String> getQueries() {
 		return this.queries;
 	}
-	
+
 	public ArrayList<Pair> getBoxCoords() {
 		return this.boxCoordinates;
 	}
-	
+
 	public void setQueries(ArrayList<String> list) {
 		this.queries = list;
 	}
-	
+
 	public void setBoxCoords(ArrayList<Pair> list, boolean alreadyScaled) {
 		if (!alreadyScaled) {
 			//determine scaling factor based on current imgURL
-			double scaleFactorX, scaleFactorY;
 			try {
 				BufferedImage img = ImageIO.read(imgURL);
 				scaleFactorX = 640.0/img.getWidth();
 				scaleFactorY = 360.0/img.getHeight();
+				System.out.println(scaleFactorX + " " + scaleFactorY);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.out.println("setBoxCoords: Image loading failed");
@@ -126,36 +122,36 @@ public class TurkApplet extends JApplet {
 				Pair p = list.get(i);
 				Point oldStart = p.getStart(), oldEnd = p.getEnd();
 				double oldStartX = oldStart.getX(),
-					oldStartY = oldStart.getY(), 
-					oldEndX = oldEnd.getX(), 
-					oldEndY = oldEnd.getY();
+						oldStartY = oldStart.getY(), 
+						oldEndX = oldEnd.getX(), 
+						oldEndY = oldEnd.getY();
 				Point newStart = new Point((int)(oldStartX*scaleFactorX), (int)(oldStartY*scaleFactorY)),
-					newEnd = new Point((int)(oldEndX*scaleFactorX), (int)(oldEndY*scaleFactorY));
+						newEnd = new Point((int)(oldEndX*scaleFactorX), (int)(oldEndY*scaleFactorY));
 				list.set(i, new Pair(newStart, newEnd));
 			}
 		}
 		this.boxCoordinates = list;
 	}
-	
+
 	public URL getUrl() {
 		return imgURL;
 	}
-	
+
 	public void setUrl(String url) throws MalformedURLException {
 		imgURL = new URL(url);
 	}
-	
+
 	public String getImageID() {
 		//TODO: code image IDs
 		return "";
 	}
-	
+
 	public BufferedImage getImage() {
 		//returns the scaled-down image
 		//not sure if this method will ever be necessary
 		return dp.img;
 	}
-	
+
 	/**
 	 * 
 	 * @return the original background image, with no bounding boxes
@@ -163,7 +159,7 @@ public class TurkApplet extends JApplet {
 	public BufferedImage getOriginalImage() {
 		return dp.originalImg;
 	}
-	
+
 	/**
 	 * 
 	 * @return an unscaled version of the modified image, with bounding boxes
@@ -171,7 +167,7 @@ public class TurkApplet extends JApplet {
 	public BufferedImage getUnscaledImage() {
 		if (dp.scaledX || dp.scaledY) {
 			BufferedImage ret = dp.originalImg;
-			
+
 			Graphics g = ret.getGraphics();
 			for (Pair p : getUnscaledBoxCoords()) {
 				g.setColor(Color.green);
@@ -179,44 +175,45 @@ public class TurkApplet extends JApplet {
 				System.out.println(p.getEnd());
 				dp.drawRect(g, p.getStart(), p.getEnd());
 			}
-		    g.dispose();
-		    
-		    
-		    return ret;
+			g.dispose();
+
+
+			return ret;
 		} else {
 			return dp.img;
 		}
 	}
-	
+
 	public ArrayList<Pair> getUnscaledBoxCoords() {
 		ArrayList<Pair> ret = new ArrayList<Pair>();
 		for (Pair p : getBoxCoords()) {
 			Point scaledS = p.getStart();
 			Point unscaledS = new Point((int)(scaledS.getX()/dp.scalingFactorX), (int)(scaledS.getY()/dp.scalingFactorY));
-			
+
 			Point scaledE = p.getEnd();
 			Point unscaledE = new Point((int)(scaledE.getX()/dp.scalingFactorX), (int)(scaledE.getY()/dp.scalingFactorY));
 			ret.add(new Pair(unscaledS, unscaledE));
 		}
-		
+
 		return ret;
 	}
-	
+
 	private class DrawingPanel extends JPanel {
-		
+
 		private Point press, release, current;
 
 		private BufferedImage img, originalImg;
+		public BufferedImage bImg;
 		private boolean scaledX, scaledY;
 		private double scalingFactorX, scalingFactorY; 
-		
+
 		private int imgW, imgH;
-		
+
 		public DrawingPanel() throws IOException {
 			this(null);
 			// TODO Auto-generated catch block
 		}
-		
+
 		public DrawingPanel(String url) throws IOException {
 			scalingFactorX = 1; //so that we don't divide by 0 in other cases
 			scalingFactorY = 1;
@@ -224,15 +221,15 @@ public class TurkApplet extends JApplet {
 				loadImage(imgURL.toString());
 			else
 				loadImage(url);
-			
+
 			MyMouseAdapter mma = new MyMouseAdapter();
 			addMouseMotionListener(mma);
 			addMouseListener(mma);
 		}
-		
+
 		private void loadImage(String URL) throws IOException {
 			setUrl(URL);
-			BufferedImage bImg = ImageIO.read(imgURL);
+			bImg = ImageIO.read(imgURL);
 			originalImg = bImg;
 			if (bImg.getWidth() > 640) {
 				scaledX = true;
@@ -248,16 +245,16 @@ public class TurkApplet extends JApplet {
 			imgH = bImg.getHeight();
 			setPreferredSize(new Dimension(imgW, imgH));
 			img = new BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_ARGB);
-			
+
 			Graphics g = img.getGraphics();
 			g.drawImage(bImg, 0, 0, this);
 			for (Pair p : boxCoordinates) {
 				g.setColor(Color.green);
 				drawRect(g, p.getStart(), p.getEnd());
 			}
-		    g.dispose();
+			g.dispose();
 		}
-		
+
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
@@ -270,35 +267,44 @@ public class TurkApplet extends JApplet {
 				drawRect(g, press, current);
 			}
 		}
-		
+
 		private void drawRect(Graphics g, Point start, Point end) {
 			Point press = start, release = end;
 			int topLeftX = (int) Math.min(press.getX(), release.getX()),
-				topLeftY = (int) Math.min(press.getY(), release.getY()),
-				width = (int) Math.abs(press.getX() - release.getX()),
-				height = (int) Math.abs(press.getY() - release.getY());
-				
+					topLeftY = (int) Math.min(press.getY(), release.getY()),
+					width = (int) Math.abs(press.getX() - release.getX()),
+					height = (int) Math.abs(press.getY() - release.getY());
+			//Ensure that the bounding box is not drawn outside the image
+			if(width >= bImg.getWidth()) width = bImg.getWidth() - 1;
+			else if (width <= 0) width = 0;
+			
+			if(height >= bImg.getHeight()) height = bImg.getHeight() - 1;
+			else if(height <= 0) height = 0;
+			
+			System.out.println("height " + height);
+			System.out.println("bImg " + bImg.getHeight());
+
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setStroke(new BasicStroke(3));
 			g.drawRect(topLeftX, topLeftY, width, height);
 
 		}
-		
+
 		public void drawToBackground() {
-		      Graphics g = img.getGraphics();
-		      g.setColor(Color.green);
-		      drawRect(g, press, release);
-		      g.dispose();
-		      
-		      String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
-		      queries.add(query);
-		      boxCoordinates.add(new Pair(press, release));
-		      
-		      press = null;
-		      
-		      repaint();
+			Graphics g = img.getGraphics();
+			g.setColor(Color.green);
+			drawRect(g, press, release);
+			g.dispose();
+
+			String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
+			queries.add(query);
+			boxCoordinates.add(new Pair(press, release));
+
+			press = null;
+
+			repaint();
 		}
-		
+
 		/**
 		 * Credit: A4L of StackOverflow (http://stackoverflow.com/questions/15558202)
 		 * 
@@ -313,28 +319,28 @@ public class TurkApplet extends JApplet {
 		 * @return scaled image
 		 */
 		public BufferedImage scale(BufferedImage sbi, int imageType, int dWidth, int dHeight, double fWidth, double fHeight) {
-		    BufferedImage dbi = null;
-		    if(sbi != null) {
-		        dbi = new BufferedImage(dWidth, dHeight, imageType);
-		        Graphics2D g = dbi.createGraphics();
-		        AffineTransform at = AffineTransform.getScaleInstance(fWidth, fHeight);
-		        g.drawRenderedImage(sbi, at);
-		    }
-		    return dbi;
+			BufferedImage dbi = null;
+			if(sbi != null) {
+				dbi = new BufferedImage(dWidth, dHeight, imageType);
+				Graphics2D g = dbi.createGraphics();
+				AffineTransform at = AffineTransform.getScaleInstance(fWidth, fHeight);
+				g.drawRenderedImage(sbi, at);
+			}
+			return dbi;
 		}
-		
+
 		private class MyMouseAdapter extends MouseAdapter {
 			@Override
-		    public void mouseDragged(MouseEvent mEvt) {
+			public void mouseDragged(MouseEvent mEvt) {
 				current = mEvt.getPoint();
 				DrawingPanel.this.repaint();
 			}
-			
+
 			@Override
 			public void mousePressed(MouseEvent mEvt) {
 				press = mEvt.getPoint();
 			}
-			
+
 			@Override
 			public void mouseReleased(MouseEvent mEvt) {
 				release = mEvt.getPoint();
@@ -342,22 +348,22 @@ public class TurkApplet extends JApplet {
 				drawToBackground();
 			}
 		}
-		
+
 	}
-	
+
 	public class Pair {
 		private Point start;	// starting point (not necessarily top left)
 		private Point end; 		// ending point (not necessarily bottom right)
-		
+
 		public Pair(Point s, Point e) {
 			start = s;
 			end = e;
 		}
-		
+
 		public Point getStart() {
 			return start;
 		}
-		
+
 		public Point getEnd() {
 			return end;
 		}
