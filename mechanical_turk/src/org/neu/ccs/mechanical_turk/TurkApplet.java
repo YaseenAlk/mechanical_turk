@@ -32,7 +32,7 @@ public class TurkApplet extends JApplet {
 	private final static int STROKE_WEIGHT = 3;
 	private final static int MAX_WIDTH = 640;
 	private final static int MAX_HEIGHT = 360;
-	
+	private final static int MIN_QUERY_LENGTH = 2;
 	
 	private URL imgURL;
 	private DrawingPanel dp;
@@ -299,7 +299,18 @@ public class TurkApplet extends JApplet {
 			drawRect(g, press, release);
 			g.dispose();
 
-			String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
+			
+			
+			//not sure how the query box should look.
+			//we could design a separate JPanel that runs for it
+			//or we could do some "hack-ish" code like this
+			
+//			String query = JOptionPane.showInputDialog(this, "Natural Language Query?");
+//			while (query == null || query.split(" ").length < TurkApplet.MIN_QUERY_LENGTH) {
+//				query = JOptionPane.showInputDialog(this, "Natural Language Query?");	
+//			}
+			String query = String.valueOf(JOptionPane.showInputDialog(this, "Natural Language Query?"));
+			
 			queries.add(query);
 			boxCoordinates.add(new Pair(press, release));
 
