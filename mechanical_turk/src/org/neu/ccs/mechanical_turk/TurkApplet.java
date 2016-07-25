@@ -10,8 +10,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -34,13 +37,11 @@ public class TurkApplet extends JApplet {
 	private final static int MAX_HEIGHT = 360;
 	private final static int MIN_QUERY_LENGTH = 2;
 	
-	private URL imgURL;
+	private String imgURL;	//it's called imgURL but it's technically a URI :P
 	private DrawingPanel dp;
 
 	public ArrayList<Pair> boxCoordinates;
 	private ArrayList<String> queries;
-
-	public boolean qStage = true;
 
 	public double scaleFactorX, scaleFactorY;
 
@@ -50,38 +51,39 @@ public class TurkApplet extends JApplet {
 		if (queries == null)
 			queries = new ArrayList<>();
 
+		checkForHTML();
+		
 		//will we need to receive any parameters?
 		try {
-			dp = new DrawingPanel(determineUrl());
+			System.out.println(getUrl().toString());
+			dp = new DrawingPanel(getUrl().toString());
 			getContentPane().add(dp);
 			setSize(dp.getPreferredSize());
 			setMinimumSize(dp.getPreferredSize());
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
-
-	public String determineUrl() {
-
-		String urlParam;
-		try 
-		{
-			if(qStage)
-			{
-				urlParam = "https://thenypost.files.wordpress.com/2014/11/citifieldfeatured.jpg";
-			}
-			else
-			{
-				urlParam = getParameter("imgURL");
-			}
-
-		} catch (NullPointerException npe) { 
-			urlParam = null; 
+	
+	public void checkForHTML() {
+		//the applet is loading an image through HTML
+		//(we might do this if we use AMT)
+		//usage:
+//		<applet code="TurkApplet" width=50 height=50>
+//		<param name=imgURL value="http://imgur.com/something.png">
+//		</applet>
+		
+		
+		String param;
+		try {
+			param = getParameter("imgURL");
+		} catch (NullPointerException npe) {
+			param = null;
 		}
-		String defaultUrl = "https://thenypost.files.wordpress.com/2014/11/citifieldfeatured.jpg",
-				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
-
-		return url;
+		
+		if (param != null) {
+			setUrl(getParameter("imgURL"));
+		}
 	}
 
 	public void undo() {
@@ -89,9 +91,9 @@ public class TurkApplet extends JApplet {
 		queries.remove(queries.size()-1);
 		try {
 			getContentPane().removeAll();
-			dp = new DrawingPanel(determineUrl());
+			dp = new DrawingPanel(getUrl().toString());
 			getContentPane().add(dp);
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 		revalidate();
@@ -114,7 +116,7 @@ public class TurkApplet extends JApplet {
 		if (!alreadyScaled) {
 			//determine scaling factor based on current imgURL
 			try {
-				BufferedImage img = ImageIO.read(imgURL);
+				BufferedImage img = ImageIO.read(new File(imgURL));
 				scaleFactorX = TurkApplet.MAX_WIDTH/((double)img.getWidth());
 				scaleFactorY = TurkApplet.MAX_HEIGHT/((double)img.getHeight());
 				System.out.println(scaleFactorX + " " + scaleFactorY);
@@ -140,12 +142,18 @@ public class TurkApplet extends JApplet {
 		this.boxCoordinates = list;
 	}
 
-	public URL getUrl() {
+	public String getUrl() {
 		return imgURL;
 	}
 
-	public void setUrl(String url) throws MalformedURLException {
-		imgURL = new URL(url);
+	public void setUrl(String url)  {
+		imgURL = url;
+//		try {
+//			imgURL = new URI(url);
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	public String getImageID() {
@@ -216,12 +224,7 @@ public class TurkApplet extends JApplet {
 
 		private int imgW, imgH;
 
-		public DrawingPanel() throws IOException {
-			this(null);
-			// TODO Auto-generated catch block
-		}
-
-		public DrawingPanel(String url) throws IOException {
+		public DrawingPanel(String url) throws IOException, URISyntaxException {
 			scalingFactorX = 1; //so that we don't divide by 0 in other cases
 			scalingFactorY = 1;
 			if (imgURL != null)
@@ -234,9 +237,9 @@ public class TurkApplet extends JApplet {
 			addMouseListener(mma);
 		}
 
-		private void loadImage(String URL) throws IOException {
+		private void loadImage(String URL) throws IOException, URISyntaxException {
 			setUrl(URL);
-			bImg = ImageIO.read(imgURL);
+			bImg = URL.startsWith("http") ? ImageIO.read(new URL(imgURL)) : ImageIO.read(new File(URL));
 			originalImg = bImg;
 			
 			//check scaling

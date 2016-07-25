@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,11 +32,15 @@ import org.w3c.dom.NodeList;
 public class AppletContainer extends JPanel {
 
 	private TurkApplet app;
-
+	private volatile boolean loading;
+	
 	public AppletContainer() {
 		this(null);
 	}
 
+	
+	//just used to test image loading from XML
+	//unlikely to be used in any other cases
 	public AppletContainer(Node XMLimageNode) {
 		app = new TurkApplet();
 		if (XMLimageNode != null)
@@ -47,20 +52,23 @@ public class AppletContainer extends JPanel {
 	}
 
 	public AppletContainer(boolean certified) {
-		if (certified)
-		{
-			app = new TurkApplet();
-			System.out.println("Turk");
-		}
-		else
+		loading = true;
+		if (!certified)
 		{
 			app = new Qualification();
 			System.out.println("Qual Japplet");
+			app.init();
+			add(app);
+			setSize(app.getSize());
+			setVisible(true);
 		}
-		app.init();
-		add(app);
-		setSize(app.getSize());
-		setVisible(true);
+		else
+		{
+			app = new TurkApplet();
+			System.out.println("Turk");
+			loadAnotherImage();
+		}
+		loading = false;
 	}
 
 	public void Qualify()
@@ -79,6 +87,41 @@ public class AppletContainer extends JPanel {
 	}
 	public TurkApplet getApp() {
 		return app;
+	}
+	
+	/**
+	 * This method is the one that chooses which image to load for the applet.
+	 * 
+	 * May be dependent on if we use AMT, or if we use this as a standalone.
+	 * 
+	 * Do we want to have multiple people label the same image?
+	 * Do we want to choose images in a random order 
+	 * (because they're currently sorted by the date they were taken)?
+	 */
+	public void loadAnotherImage() {
+		loading = true;
+		removeAll();
+		app = new TurkApplet();
+		
+		//how do we determine the next URL? (could change depending on our platform)
+		//for now, we will assume that all of our images are stored in one directory on some server
+		
+		//an "image directory" var will be initialized by chooseImgDir()
+		//and every time loadAnotherImage() is called, an image will be selected from the image directory list
+		//and it will be removed from the list so that one user will not 
+		app.setUrl("http://oi65.tinypic.com/fcjwyb.jpg");
+		
+		app.init();
+		add(app);
+		setSize(app.getSize());
+		setVisible(true);
+		
+		revalidate();
+		loading = false;
+	}
+	
+	public boolean isLoading() {
+		return loading;
 	}
 
 	public void loadFromXML(Node imageNode) {
@@ -119,11 +162,7 @@ public class AppletContainer extends JPanel {
 			}
 		}
 
-		try {
-			app.setUrl(imgURL);
-		} catch (MalformedURLException e) {
-			System.out.println("Image loading failed: bad url");
-		}
+		app.setUrl(imgURL);
 		app.setBoxCoords(boxCoords, false);
 		app.setQueries(queries);
 	}

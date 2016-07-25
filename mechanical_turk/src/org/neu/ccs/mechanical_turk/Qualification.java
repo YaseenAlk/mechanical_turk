@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -43,12 +44,7 @@ public class Qualification extends TurkApplet {
 
 	@Override
 	public void init() {
-		try {
-			super.setUrl("http://oi65.tinypic.com/fcjwyb.jpg");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super.setUrl("http://wallpapersonthe.net/wallpapers/b/3840x2160/3840x2160-robot-16900.jpg");
 		super.init();
 	}
 
@@ -127,7 +123,7 @@ public class Qualification extends TurkApplet {
 			ArrayList<String> userQuery = super.getQueries();
 			System.out.println(userQuery);
 			String query = userQuery.get(i);
-			if (query.toLowerCase().contains("Grey")) qualScore++;
+			if (query.toLowerCase().contains("grey")) qualScore++;
 			if (query.toLowerCase().contains("robot")) qualScore++;
 			checkScore = true;
 		}
@@ -135,7 +131,7 @@ public class Qualification extends TurkApplet {
 
 
 		//If the user achieves a qualification score of 2 or greater, than they are qualified
-		while(checkScore){
+		while(checkScore) {
 			System.out.println("qualScore: " + qualScore);
 			checkScore = false;
 			if(qualScore >= 2)

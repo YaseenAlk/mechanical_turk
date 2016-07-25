@@ -23,11 +23,12 @@ import javax.swing.JLabel;
 
 public class GUI {
 
+	private static final boolean LOAD_FROM_XML = false;
+	private static final boolean RESIZABLE = false;
+	
 	private JFrame frame;
 	private volatile boolean undoSubmitLocked, submitted, nextLocked;
 	private JButton btnNext, btnSubmit, btnUndo;
-	
-	private static final boolean loadFromXML = false;
 	
 	private Thread listener;
 	private AppletContainer appContainer;
@@ -91,7 +92,11 @@ public class GUI {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		if (loadFromXML) {
+		if (GUI.LOAD_FROM_XML) {
+			
+			//load image from XML directory listed below
+			//this is completely independent of the project goal; it's just to show
+			//example code for loading the image from an XML
 			
 			try {
 				String xmlPath = System.getProperty("user.home");
@@ -110,31 +115,41 @@ public class GUI {
 				e1.printStackTrace();
 			}
 			
-		} else
+		} else {
+			//load either qualification or an image to label
+			//(depends on if you've passed certification or not)
+			
 			appContainer = new AppletContainer(certified);
-		
+		}
 		//Buttons
 		btnNext = new JButton("Next");
-
+		btnNext.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				appContainer.loadAnotherImage();
+			}
+		});
+		
 		btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				submitted = true;
-				try {
-					if(certified)
-					{
+				if(certified)
+				{
+					try {
 						//appContainer.saveImage();
 						appContainer.exportData();
 						btnSubmit.setEnabled(true);
-					} 
-					else
-					{
-						btnSubmit.setEnabled(false);
-						appContainer.Qualify();
+					} catch (ParserConfigurationException | TransformerException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
-				} catch (ParserConfigurationException | TransformerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} else{
+					appContainer.Qualify();
+					if (appContainer.ruCertified())
+						messLabel.setText(messCert);
+					else
+						messLabel.setText(messnCert);
+						
 				}
 			}
 		});
@@ -187,38 +202,35 @@ public class GUI {
 					.addComponent(btnNext)
 					.addContainerGap())
 		);
-
 		frame.getContentPane().setLayout(groupLayout);
-		startListener();
 		
 		int x1 = (int) (1.5 * (appContainer.getBounds().width + btnSubmit.getBounds().width)), 
 			y1 = (int) (1.75 * (appContainer.getBounds().height + btnSubmit.getBounds().height + messLabel.getBounds().height));
 		frame.setBounds(100, 100, x1, y1);
 		frame.setMinimumSize(new Dimension((int)frame.getBounds().getWidth(), (int)frame.getBounds().getHeight()));
+		frame.setResizable(GUI.RESIZABLE);
+		
+		if (certified)
+			messLabel.setText(messCert);
+		else
+			messLabel.setText(messnCert);
+		
+		startListener();
 	}
 
 	private class Listener implements Runnable {
 
 		@Override
 		public void run() {
-			boolean breaking = false;
-			while(!breaking){
-				if(certified)
-				{
-					breaking = true;
-					System.out.println("GUI thinks you are certified");
-					messLabel.setText(messCert);
-				}
-				else 
-					//certified = appContainer.ruCertified();
-					messLabel.setText(messnCert);
-			}
 			while (true) {
-				updateButtons();
+				if (!certified)
+					certified = appContainer.ruCertified();
+				if (!appContainer.isLoading())
+					updateButtons();
 			}
 		}
 		private void updateButtons() {
-			undoSubmitLocked = appContainer.getApp().getBoxCoords().size() < 1;
+			undoSubmitLocked = appContainer.getApp().getBoxCoords().size() < 1 || submitted;
 			nextLocked = !submitted;//just for clean naming
 
 			btnUndo.setEnabled(!undoSubmitLocked);
