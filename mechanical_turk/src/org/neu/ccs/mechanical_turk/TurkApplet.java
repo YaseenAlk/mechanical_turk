@@ -28,6 +28,12 @@ import javax.swing.JPanel;
  */
 
 public class TurkApplet extends JApplet {
+	
+	private final static int STROKE_WEIGHT = 3;
+	private final static int MAX_WIDTH = 640;
+	private final static int MAX_HEIGHT = 360;
+	
+	
 	private URL imgURL;
 	private DrawingPanel dp;
 
@@ -108,8 +114,8 @@ public class TurkApplet extends JApplet {
 			//determine scaling factor based on current imgURL
 			try {
 				BufferedImage img = ImageIO.read(imgURL);
-				scaleFactorX = 640.0/img.getWidth();
-				scaleFactorY = 360.0/img.getHeight();
+				scaleFactorX = TurkApplet.MAX_WIDTH/((double)img.getWidth());
+				scaleFactorY = TurkApplet.MAX_HEIGHT/((double)img.getHeight());
 				System.out.println(scaleFactorX + " " + scaleFactorY);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -231,16 +237,20 @@ public class TurkApplet extends JApplet {
 			setUrl(URL);
 			bImg = ImageIO.read(imgURL);
 			originalImg = bImg;
-			if (bImg.getWidth() > 640) {
+			
+			//check scaling
+			if (bImg.getWidth() > TurkApplet.MAX_WIDTH) {
 				scaledX = true;
-				scalingFactorX = 640.0/bImg.getWidth();
-				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, 640, bImg.getHeight(), scalingFactorX, 1);
+				scalingFactorX = TurkApplet.MAX_WIDTH/((double)bImg.getWidth());
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, TurkApplet.MAX_WIDTH, bImg.getHeight(), scalingFactorX, 1);
 			}
-			if (bImg.getHeight() > 480) {
+			if (bImg.getHeight() > TurkApplet.MAX_HEIGHT) {
 				scaledY = true;
-				scalingFactorY = 360.0/bImg.getHeight();
-				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, bImg.getWidth(), 360, 1, scalingFactorY);
+				scalingFactorY = TurkApplet.MAX_HEIGHT/((double) bImg.getHeight());
+				bImg = scale(bImg, BufferedImage.TYPE_INT_ARGB, bImg.getWidth(), TurkApplet.MAX_HEIGHT, 1, scalingFactorY);
 			}
+			
+			//set size of the image
 			imgW = bImg.getWidth();
 			imgH = bImg.getHeight();
 			setPreferredSize(new Dimension(imgW, imgH));
@@ -248,6 +258,8 @@ public class TurkApplet extends JApplet {
 
 			Graphics g = img.getGraphics();
 			g.drawImage(bImg, 0, 0, this);
+			
+			//draw any pre-existing rectangles (if the object is initialized with existing points/queries)
 			for (Pair p : boxCoordinates) {
 				g.setColor(Color.green);
 				drawRect(g, p.getStart(), p.getEnd());
@@ -274,18 +286,9 @@ public class TurkApplet extends JApplet {
 					topLeftY = (int) Math.min(press.getY(), release.getY()),
 					width = (int) Math.abs(press.getX() - release.getX()),
 					height = (int) Math.abs(press.getY() - release.getY());
-			//Ensure that the bounding box is not drawn outside the image
-			if(width >= bImg.getWidth()) width = bImg.getWidth() - 1;
-			else if (width <= 0) width = 0;
-			
-			if(height >= bImg.getHeight()) height = bImg.getHeight() - 1;
-			else if(height <= 0) height = 0;
-			
-			System.out.println("height " + height);
-			System.out.println("bImg " + bImg.getHeight());
 
 			Graphics2D g2 = (Graphics2D) g;
-			g2.setStroke(new BasicStroke(3));
+			g2.setStroke(new BasicStroke(TurkApplet.STROKE_WEIGHT));
 			g.drawRect(topLeftX, topLeftY, width, height);
 
 		}
@@ -345,6 +348,21 @@ public class TurkApplet extends JApplet {
 			public void mouseReleased(MouseEvent mEvt) {
 				release = mEvt.getPoint();
 				current = null;
+
+				//Ensure that if the bounding box is drawn outside the image frame
+				//it is still registered as the max frame width / height
+				int pressX = (int) Math.min(Math.max(0, press.getX()), 
+											bImg.getWidth()-TurkApplet.STROKE_WEIGHT);
+				int pressY = (int) Math.min(Math.max(0, press.getY()), 
+											bImg.getHeight()-TurkApplet.STROKE_WEIGHT);
+				int releaseX = (int) Math.min(Math.max(0, release.getX()), 
+											bImg.getWidth()-TurkApplet.STROKE_WEIGHT);
+				int releaseY = (int) Math.min(Math.max(0, release.getY()), 
+											bImg.getHeight()-TurkApplet.STROKE_WEIGHT);
+				
+				press = new Point(pressX, pressY);
+				release = new Point(releaseX, releaseY);
+				
 				drawToBackground();
 			}
 		}
