@@ -68,7 +68,7 @@ public class TurkApplet extends JApplet {
 		{
 			if(qStage)
 			{
-				urlParam = "http://st.hzcdn.com/simgs/1f418e7904ff0974_4-6626/contemporary-desks-and-hutches.jpg";
+				urlParam = "https://thenypost.files.wordpress.com/2014/11/citifieldfeatured.jpg";
 			}
 			else
 			{
@@ -78,7 +78,7 @@ public class TurkApplet extends JApplet {
 		} catch (NullPointerException npe) { 
 			urlParam = null; 
 		}
-		String defaultUrl = "http://images.media-allrecipes.com/userphotos/250x250/00/64/20/642001.jpg",
+		String defaultUrl = "https://thenypost.files.wordpress.com/2014/11/citifieldfeatured.jpg",
 				url = (urlParam == null || urlParam.isEmpty() ? defaultUrl : urlParam);
 
 		return url;
@@ -95,6 +95,7 @@ public class TurkApplet extends JApplet {
 			e.printStackTrace();
 		}
 		revalidate();
+		System.gc(); // :(
 	}
 
 	public ArrayList<String> getQueries() {
@@ -363,13 +364,13 @@ public class TurkApplet extends JApplet {
 				//Ensure that if the bounding box is drawn outside the image frame
 				//it is still registered as the max frame width / height
 				int pressX = (int) Math.min(Math.max(0, press.getX()), 
-											bImg.getWidth()-TurkApplet.STROKE_WEIGHT);
+											bImg.getWidth()-TurkApplet.STROKE_WEIGHT+1);
 				int pressY = (int) Math.min(Math.max(0, press.getY()), 
-											bImg.getHeight()-TurkApplet.STROKE_WEIGHT);
+											bImg.getHeight()-TurkApplet.STROKE_WEIGHT+1);
 				int releaseX = (int) Math.min(Math.max(0, release.getX()), 
-											bImg.getWidth()-TurkApplet.STROKE_WEIGHT);
+											bImg.getWidth()-TurkApplet.STROKE_WEIGHT+1);
 				int releaseY = (int) Math.min(Math.max(0, release.getY()), 
-											bImg.getHeight()-TurkApplet.STROKE_WEIGHT);
+											bImg.getHeight()-TurkApplet.STROKE_WEIGHT+1);
 				
 				press = new Point(pressX, pressY);
 				release = new Point(releaseX, releaseY);
