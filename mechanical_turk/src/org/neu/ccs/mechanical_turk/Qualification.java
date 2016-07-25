@@ -50,7 +50,7 @@ public class Qualification extends TurkApplet {
 	@Override
 	public void init() {
 		try {
-			super.setUrl("http://wallpapersonthe.net/wallpapers/b/3840x2160/3840x2160-robot-16900.jpg");
+			super.setUrl("http://oi65.tinypic.com/fcjwyb.jpg");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
