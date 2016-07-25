@@ -209,7 +209,7 @@ public class AppletContainer extends JPanel {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
 		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(new File("/home/ur5/test.xml"));
+		StreamResult result = new StreamResult(new File(System.getProperty("user.home") + "/test.xml"));
 
 		transformer.transform(source, result);
 
