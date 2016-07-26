@@ -4,12 +4,11 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -33,6 +32,7 @@ public class AppletContainer extends JPanel {
 
 	private TurkApplet app;
 	private volatile boolean loading;
+	private List<String> imageBank;	//a list containing all possible image URLs
 	
 	public AppletContainer() {
 		this(null);
@@ -53,6 +53,7 @@ public class AppletContainer extends JPanel {
 
 	public AppletContainer(boolean certified) {
 		loading = true;
+		chooseImgDir();
 		if (!certified)
 		{
 			app = new Qualification();
@@ -108,8 +109,12 @@ public class AppletContainer extends JPanel {
 		
 		//an "image directory" var will be initialized by chooseImgDir()
 		//and every time loadAnotherImage() is called, an image will be selected from the image directory list
-		//and it will be removed from the list so that one user will not 
-		app.setUrl("http://oi65.tinypic.com/fcjwyb.jpg");
+		//and it will be removed from the list so that one user will not repeat an image
+		
+		int randomImage = (int)(Math.random()*imageBank.size());
+		
+		app.setUrl(imageBank.get(randomImage));
+		imageBank.remove(randomImage);
 		
 		app.init();
 		add(app);
@@ -117,6 +122,17 @@ public class AppletContainer extends JPanel {
 		setVisible(true);
 		
 		revalidate();
+		loading = false;
+	}
+	
+	public void chooseImgDir() {
+		//this is the method that instantiates imageBank and fills it with all possible image URLs
+		loading = true;
+		
+		//in the future, maybe use this method to retrieve all image URLs using FTP?
+		imageBank = new ArrayList<>();
+		imageBank.add("http://i.imgur.com/9bFZ38H.jpg");
+		
 		loading = false;
 	}
 	
