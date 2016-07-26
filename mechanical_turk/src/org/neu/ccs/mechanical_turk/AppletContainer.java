@@ -42,6 +42,7 @@ public class AppletContainer extends JPanel {
 	//just used to test image loading from XML
 	//unlikely to be used in any other cases
 	public AppletContainer(Node XMLimageNode) {
+		loading = true;
 		app = new TurkApplet();
 		if (XMLimageNode != null)
 			loadFromXML(XMLimageNode);
@@ -49,6 +50,7 @@ public class AppletContainer extends JPanel {
 		add(app);
 		setSize(app.getSize());
 		setVisible(true);
+		loading = false;
 	}
 
 	public AppletContainer(boolean certified) {
