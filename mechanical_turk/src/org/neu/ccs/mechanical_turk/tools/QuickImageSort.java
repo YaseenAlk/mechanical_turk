@@ -35,7 +35,7 @@ public class QuickImageSort {
 	private JFrame frame;
 	
 	private final static String imageDir = System.getProperty("user.home") + "/Desktop/";
-	
+
 	private static ArrayList<File> images;
 	private ImageContainer panel;
 	private static int currentImg;

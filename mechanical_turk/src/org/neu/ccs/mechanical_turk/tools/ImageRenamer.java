@@ -9,7 +9,8 @@ import java.text.SimpleDateFormat;
  */
 public class ImageRenamer {
 
-	private final static String imageDir = System.getProperty("user.home") + "/Desk Auto 15/";
+
+	private static final String imageDir = System.getProperty("user.home") + "/Desk Auto 22";
 	
 	public static void main(String[] args) {
 		File dir = new File(imageDir);
