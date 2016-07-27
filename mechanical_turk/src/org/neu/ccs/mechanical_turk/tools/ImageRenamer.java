@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class ImageRenamer {
 
+
 	private static final String imageDir = System.getProperty("user.home") + "/Desk Auto 22";
 	
 	public static void main(String[] args) {
@@ -22,10 +23,10 @@ public class ImageRenamer {
 				String newName = sdf.format(files[i].lastModified());
 				System.out.println(newName);
 				
-				if (!files[i].renameTo(new File(files[i].getParent() + "/" + newName + ".png"))) {
+				if (!files[i].renameTo(new File(files[i].getParent() + "/" + newName))) {
 					System.err.println("Failed to rename " + oldName + " to " + newName);
 				} else {
-					System.out.println("Successfully renamed "  + oldName + " to " + newName);
+					//System.out.println("Successfully renamed "  + oldName + " to " + newName);
 				}
 			}
 		}
