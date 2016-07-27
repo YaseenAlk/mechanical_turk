@@ -25,11 +25,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 
+/**
+ * 
+ * @author Yaseen Alkhafaji <alkhafaji.yaseen@gmail.com>
+ *
+ */
 public class QuickImageSort {
 
 	private JFrame frame;
 	
-	private final static String imageDir = System.getProperty("user.home") + "/Desk Auto 15/";
+	private final static String imageDir = System.getProperty("user.home") + "/Desktop/";
 	
 	private static ArrayList<File> images;
 	private ImageContainer panel;

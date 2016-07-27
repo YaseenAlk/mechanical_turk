@@ -2,7 +2,11 @@ package org.neu.ccs.mechanical_turk.tools;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-
+/**
+ * 
+ * @author Yaseen Alkhafaji <alkhafaji.yaseen@gmail.com>
+ * 
+ */
 public class ImageRenamer {
 
 	private final static String imageDir = System.getProperty("user.home") + "/Desk Auto 15/";
@@ -15,6 +19,7 @@ public class ImageRenamer {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 		
 		for (int i = 0; i < files.length; i++) {
+			
 			if (files[i].getName().endsWith(".png")) {
 				String oldName = files[i].getName();
 				System.out.print(oldName);

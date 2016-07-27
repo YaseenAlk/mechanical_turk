@@ -28,6 +28,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * 
+ * @author Yaseen Alkhafaji <alkhafaji.yaseen@gmail.com>
+ * @author Michael Barbini
+ *
+ */
 public class AppletContainer extends JPanel {
 
 	private TurkApplet app;
@@ -88,8 +94,13 @@ public class AppletContainer extends JPanel {
 	{
 		return ((Qualification) app).certified;
 	}
+	
 	public TurkApplet getApp() {
 		return app;
+	}
+	
+	public boolean hasMoreImages() {
+		return !imageBank.isEmpty();
 	}
 	
 	/**

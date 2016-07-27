@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
@@ -20,7 +21,13 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
+/**
+ * 
+ * @author Yaseen Alkhafaji <alkhafaji.yaseen@gmail.com>
+ * @author Michael Barbini
+ */
 public class GUI {
 
 	private static final boolean LOAD_FROM_XML = false;
@@ -125,7 +132,12 @@ public class GUI {
 		btnNext = new JButton("Next");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				appContainer.loadAnotherImage();
+				if (appContainer.hasMoreImages()) {
+					appContainer.loadAnotherImage();
+					submitted = false;
+				} else {
+					JOptionPane.showMessageDialog(appContainer, "Out of images! Thank you.");
+				}
 			}
 		});
 		
