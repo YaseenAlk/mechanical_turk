@@ -29,7 +29,7 @@ public class QuickImageSort {
 
 	private JFrame frame;
 	
-	private final static String imageDir = System.getProperty("user.home") + "/Pictures";
+	private final static String imageDir = System.getProperty("user.home") + "/Pictures/Desk Auto 22";
 	
 	private static ArrayList<File> images;
 	private ImageContainer panel;

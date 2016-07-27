@@ -30,41 +30,39 @@ import org.neu.ccs.mechanical_turk.TurkApplet.Pair;
  */
 
 public class Qualification extends TurkApplet {
-
+	
+	//If in qualification stage
 	public boolean qStage = true;
+	//If certified
 	public boolean certified = false;
+	//To check the score to see if certified
 	private boolean checkScore = false;
 
-	/*Whether a user is qualified is based on if they achieve a min score
-	of 2 of the three possible points:
+	/*Whether a user is qualified is based on if they achieve a minimum score:
 	1 for correct bounding box
-	1 for having "grey" mentioned in their query 
-	1 for have "robot" mentioned in their query*/
+	1 for each correct word in the query*/
 	private int qualScore = 0;
 
 	@Override
 	public void init() {
-		super.setUrl("http://wallpapersonthe.net/wallpapers/b/3840x2160/3840x2160-robot-16900.jpg");
+		//Qualification Image
+		super.setUrl("http://i.imgur.com/ZQr0v9C.jpg");
 		super.init();
 	}
 
 	public void qualCoord() throws UnsupportedEncodingException, FileNotFoundException, IOException
 	{
-		//The 'designated' pixels- the ones that correctly make up the edge of the bounding box
-		//int x1 = (int) (334 * super.scaleFactorX); int y1 = (int) (231 * super.scaleFactorY);
-		//int x2 = (int) (super.scaleFactorX * 567); int y2 = (int) (super.scaleFactorY * 363);
-
-		int x1 = (int) (334); int y1 = (int) (231);
-		int x2 = (int) (567); int y2 = (int) (363);
+		//The coordinates that are correct
+		//Requires that already know the coordinates from example image
+		int x1 = 334; int y1 = 231;
+		int x2 = 567; int y2 = 363;
 
 		//How many pixels that the user can be away from the 'designated' pixel
+		//and still be considered a correct bounding box
 		int allowance = 30;
 
 		for (Pair p : super.getBoxCoords()) 
 		{
-			//System.out.println(super.scaleFactorX);
-			//System.out.println("Correct a " + x1 + " " + y1);
-			//System.out.println("Correct b " + x2 + " " + y2);
 
 			//The user's inputed coordinates
 			Point a = p.getStart();
@@ -91,7 +89,6 @@ public class Qualification extends TurkApplet {
 			
 			if(secY > 360) secY = 360;
 			else if (secY < 0) secY = 0;
-			//System.out.println("User Point secY " + secY);
 
 			//Ensures that no matter where the user draws their first coordinate, 
 			//it always reverts back to the top left of the rectangle
@@ -121,10 +118,52 @@ public class Qualification extends TurkApplet {
 		for (int i = 0; i < super.getQueries().size(); i ++)
 		{
 			ArrayList<String> userQuery = super.getQueries();
-			System.out.println(userQuery);
+			//System.out.println(userQuery);
 			String query = userQuery.get(i);
-			if (query.toLowerCase().contains("grey")) qualScore++;
-			if (query.toLowerCase().contains("robot")) qualScore++;
+			
+			//Monitor
+			if (query.toLowerCase().contains("monitor") || query.toLowerCase().contains("screen")) 
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "black,center".split(","));
+			}
+			
+			//Mason Book 
+			if (query.toLowerCase().contains("book"))
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "white,mason,left".split(","));
+			}
+			
+			//Keyboard
+			if (query.toLowerCase().contains("keyboard"))
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "black,center".split(","));
+			}
+			
+			//Mouse
+			if (query.toLowerCase().contains("mouse"))
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "black,right".split(","));
+			}
+			
+			//5 Hour Energy Bottle
+			if (query.toLowerCase().contains("bottle") || query.toLowerCase().contains("five") || query.toLowerCase().contains("5"))
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "red,orange,right".split(","));
+			}
+			
+			//Cup
+			if (query.toLowerCase().contains("cup"))
+			{
+				qualScore++;
+				qualScore += checkForPossibilities(query, "red,right".split(","));
+			}
+			
+			
 			checkScore = true;
 		}
 
@@ -134,7 +173,7 @@ public class Qualification extends TurkApplet {
 		while(checkScore) {
 			System.out.println("qualScore: " + qualScore);
 			checkScore = false;
-			if(qualScore >= 2)
+			if(qualScore >= 16)
 			{
 				certified = true;
 				System.out.println("Certified");
@@ -157,9 +196,19 @@ public class Qualification extends TurkApplet {
 					System.out.println("failed to create file");
 					e.printStackTrace();
 				}
-			}else{
+			}else{				
 				System.out.println("you are not certified");
 			}
 		}
+	}
+	
+	public int checkForPossibilities(String query, String[] possibilities)
+	{
+		int score = 0;
+		for (int i = 0; i < possibilities.length; i++)
+		{
+			if(query.toLowerCase().contains(possibilities[i])) score++;
+		}
+		return score;
 	}
 }
