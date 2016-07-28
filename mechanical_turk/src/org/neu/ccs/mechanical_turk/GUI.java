@@ -144,7 +144,7 @@ public class GUI {
 		btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				submitted = true;
+				
 				if(certified)
 				{
 					try {
@@ -155,13 +155,15 @@ public class GUI {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					submitted = true;
 				} else{
 					appContainer.Qualify();
-					if (appContainer.ruCertified())
+					if (appContainer.ruCertified()) {
 						messLabel.setText(messCert);
-					else
+						submitted = true;
+					} else {
 						messLabel.setText(messnCert);
-						
+					}
 				}
 			}
 		});
