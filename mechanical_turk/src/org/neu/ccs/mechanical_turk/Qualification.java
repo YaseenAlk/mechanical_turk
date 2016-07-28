@@ -1,5 +1,6 @@
 package org.neu.ccs.mechanical_turk;
 
+import java.awt.List;
 import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -52,66 +54,35 @@ public class Qualification extends TurkApplet {
 
 	public void qualCoord() throws UnsupportedEncodingException, FileNotFoundException, IOException
 	{
-		//The coordinates that are correct
-		//Requires that already know the coordinates from example image
-		int x1 = 334; int y1 = 231;
-		int x2 = 567; int y2 = 363;
-
-		//How many pixels that the user can be away from the 'designated' pixel
-		//and still be considered a correct bounding box
-		int allowance = 30;
-
-		for (Pair p : super.getBoxCoords()) 
+		
+		ArrayList<Pair>boxC = getBoxCoords();
+		for(int i = 0; i < boxC.size(); i ++)
 		{
-
 			//The user's inputed coordinates
-			Point a = p.getStart();
-			Point b = p.getEnd();
-			//System.out.println("User Point a " + a);
-			//System.out.println("User Point b " + b);
-
-			int firstX = (int) a.getX();
-			int firstY = (int) a.getY();
-
-			int secX = (int) b.getX();
-			int secY = (int) b.getY();
+			Pair currentC = boxC.get(i);
 			
-			//Ensure that if the bounding box is drawn outside the image frame
-			//it is still registered as the max frame width / height
-			if(firstX > 640) firstX = 640;
-			else if (firstX < 0) firstX = 0;
+			//The coordinates that are correct
+			//Requires that already know the coordinates from example image
 			
-			if(secX > 640) secX = 640;
-			else if (secX < 0) secX = 0;
+			//Monitor
+			qualScore += checkCoords(120, 0, 449, 198, currentC);
 			
-			if(firstY > 360) firstY = 360;
-			else if (firstY < 0) firstY = 0;
+			//Keyboard
+			qualScore += checkCoords(451, 178, 163, 290, currentC);
 			
-			if(secY > 360) secY = 360;
-			else if (secY < 0) secY = 0;
-
-			//Ensures that no matter where the user draws their first coordinate, 
-			//it always reverts back to the top left of the rectangle
-			//and that the end coordinate is always the bottom right
-			int topLeftX = Math.min(firstX, secX);
-			int topLeftY = Math.min(firstY,secY);
-			int bottomRightX = Math.max(firstX, secX);
-			int bottomRightY = Math.max(firstY,secY);
-
-			//Used to find if coordinates within the allowance
-			if(((topLeftX >= x1 - allowance) && (topLeftX <= x1 + allowance)) &&
-					((topLeftY >= y1 - allowance) && (topLeftY <= y1 + allowance)) &&
-					((bottomRightX >= x2 - allowance) && (bottomRightX <= x2 + allowance)) &&
-					((bottomRightY >= y2 - allowance) && (bottomRightY <= y2 + allowance))
-					)
-			{
-				qualScore++;
-				checkScore = true;
-			} 
-			else 
-			{
-				checkScore = true;
-			}
+			//Red Bull
+			qualScore += checkCoords(480, 168, 514, 216, currentC);
+			
+			//Cup
+			qualScore += checkCoords(437, 131, 497, 190, currentC);
+			
+			//Book
+			qualScore += checkCoords(25, 190, 190, 317, currentC);
+			
+			//Mouse
+			qualScore += checkCoords(467, 243, 531, 309, currentC);
+			
+			checkScore = true;
 		}
 
 		//To qualify the user by whether their query is correct 
@@ -173,7 +144,7 @@ public class Qualification extends TurkApplet {
 		while(checkScore) {
 			System.out.println("qualScore: " + qualScore);
 			checkScore = false;
-			if(qualScore >= 16)
+			if(qualScore >= 16) //60% correct 16 out of 26 possible points
 			{
 				certified = true;
 				System.out.println("Certified");
@@ -201,13 +172,54 @@ public class Qualification extends TurkApplet {
 			}
 		}
 	}
-	
+
 	public int checkForPossibilities(String query, String[] possibilities)
 	{
 		int score = 0;
 		for (int i = 0; i < possibilities.length; i++)
 		{
 			if(query.toLowerCase().contains(possibilities[i])) score++;
+		}
+		return score;
+	}
+	
+	public int checkCoords(int x1, int y1, int x2, int y2, Pair currentC)
+	{
+		//How many pixels that the user can be away from the 'designated' pixel
+		//and still be considered a correct bounding box
+		int allowance = 15;
+				
+		Point a = currentC.getStart();
+		Point b = currentC.getEnd();
+		
+		int firstX = (int) a.getX();
+		int firstY = (int) a.getY();
+
+		int secX = (int) b.getX();
+		int secY = (int) b.getY();
+		
+		System.out.println("FirstX " + firstX);
+		System.out.println("FirstY " + firstY);
+		
+		System.out.println("SecondX " + secX);
+		System.out.println("SecondY " + secY);
+		
+		//Ensures that no matter where the user draws their first coordinate, 
+		//it always reverts back to the top left of the rectangle
+		//and that the end coordinate is always the bottom right
+		int topLeftX = Math.min(firstX, secX);
+		int topLeftY = Math.min(firstY,secY);
+		int bottomRightX = Math.max(firstX, secX);
+		int bottomRightY = Math.max(firstY,secY);
+		
+		int score = 0;
+		if(((topLeftX >= x1 - allowance) && (topLeftX <= x1 + allowance)) &&
+				((topLeftY >= y1 - allowance) && (topLeftY <= y1 + allowance)) &&
+				((bottomRightX >= x2 - allowance) && (bottomRightX <= x2 + allowance)) &&
+				((bottomRightY >= y2 - allowance) && (bottomRightY <= y2 + allowance))
+				)
+		{
+			score++;
 		}
 		return score;
 	}
