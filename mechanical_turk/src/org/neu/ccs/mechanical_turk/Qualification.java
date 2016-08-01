@@ -2,6 +2,8 @@ package org.neu.ccs.mechanical_turk;
 
 import java.awt.List;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,6 +60,7 @@ public class Qualification extends TurkApplet {
 		ArrayList<Pair>boxC = getBoxCoords();
 		for(int i = 0; i < boxC.size(); i ++)
 		{
+			System.out.println(boxC.size());
 			//The user's inputed coordinates
 			Pair currentC = boxC.get(i);
 			
@@ -183,12 +186,10 @@ public class Qualification extends TurkApplet {
 		return score;
 	}
 	
+	//Requires that know the ground truth coordinates
 	public int checkCoords(int x1, int y1, int x2, int y2, Pair currentC)
 	{
-		//How many pixels that the user can be away from the 'designated' pixel
-		//and still be considered a correct bounding box
-		int allowance = 15;
-				
+		//Gets the individual points from the user bounding box list			
 		Point a = currentC.getStart();
 		Point b = currentC.getEnd();
 		
@@ -198,26 +199,65 @@ public class Qualification extends TurkApplet {
 		int secX = (int) b.getX();
 		int secY = (int) b.getY();
 		
+		//Finding the four coordinates
+		//Left
+		int leftX = Math.min(firstX, secX);
+		
+		//Right
+		int rightX = Math.max(firstX, secX);
+		
+		//Top
+		int topY = Math.min(firstY,secY);
+		
+		//Bottom
+		int bottomY = Math.max(firstY,secY);
+		
+		//For debugging purposes
 		System.out.println("FirstX " + firstX);
 		System.out.println("FirstY " + firstY);
 		
 		System.out.println("SecondX " + secX);
 		System.out.println("SecondY " + secY);
 		
-		//Ensures that no matter where the user draws their first coordinate, 
-		//it always reverts back to the top left of the rectangle
-		//and that the end coordinate is always the bottom right
-		int topLeftX = Math.min(firstX, secX);
-		int topLeftY = Math.min(firstY,secY);
-		int bottomRightX = Math.max(firstX, secX);
-		int bottomRightY = Math.max(firstY,secY);
+		//Finding the userLength and width of the user bounding box
+		double userLength =  java.lang.Math.abs(secX - firstX);
+		double userWidth =  java.lang.Math.abs(secY - firstY);
 		
+		//Finding the area
+		double userArea = userLength * userWidth;
+		
+		//Finding length and width of the ground truth rectangle
+		double gtLength =  java.lang.Math.abs(x2 - x1);
+		double gtWidth =  java.lang.Math.abs(y2 - y1);
+		
+		//Finding the area
+		double gtArea = gtLength * gtWidth;
+		
+		//Finding the intersection of the rectangles		
+		//User Rectangle
+		Rectangle userRectangle = new Rectangle(leftX, topY, rightX, bottomY);
+		
+		//Ground truth rectangle
+		Rectangle gtRectangle = new Rectangle(x1, y1, x2, y2);
+		
+		//Intersection
+		Rectangle intersection = userRectangle.intersection(gtRectangle);
+		
+		//Finding the area of non-overlap
+		double intWidth = intersection.getWidth();
+		double intHeight = intersection.getHeight();
+		
+		double intArea = intWidth * intHeight;
+		
+		//Non-overlap of user Rectangle
+		double userNO = userArea - intArea;
+		//Non-overlap of ground truth rectangle
+		double gtNO = gtArea - intArea;
+
+		//Local score to calculate how many points earned for bounding boxes
 		int score = 0;
-		if(((topLeftX >= x1 - allowance) && (topLeftX <= x1 + allowance)) &&
-				((topLeftY >= y1 - allowance) && (topLeftY <= y1 + allowance)) &&
-				((bottomRightX >= x2 - allowance) && (bottomRightX <= x2 + allowance)) &&
-				((bottomRightY >= y2 - allowance) && (bottomRightY <= y2 + allowance))
-				)
+		
+		if((userNO + gtNO) / gtNO <= .1)
 		{
 			score++;
 		}
