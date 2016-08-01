@@ -236,16 +236,19 @@ public class Qualification extends TurkApplet {
 		//Finding the intersection of the rectangles		
 		//User Rectangle
 		Rectangle userRectangle = new Rectangle(leftX, topY, rightX, bottomY);
+		System.out.println(userRectangle.getBounds());
 		
 		//Ground truth rectangle
 		Rectangle gtRectangle = new Rectangle(x1, y1, x2, y2);
+		System.out.println(gtRectangle.getBounds());
 		
 		//Intersection
-		Rectangle intersection = userRectangle.intersection(gtRectangle);
+		Rectangle intRect = userRectangle.intersection(gtRectangle);
+		System.out.println(intRect.getBounds());
 		
 		//Finding the area of non-overlap
-		double intWidth = intersection.getWidth();
-		double intHeight = intersection.getHeight();
+		double intWidth = intRect.getWidth();
+		double intHeight = intRect.getHeight();
 		
 		double intArea = intWidth * intHeight;
 		
@@ -257,7 +260,7 @@ public class Qualification extends TurkApplet {
 		//Local score to calculate how many points earned for bounding boxes
 		int score = 0;
 		
-		if((userNO + gtNO) / gtNO <= .1)
+		if((userNO + gtNO) / gtArea <= .1)
 		{
 			score++;
 		}
