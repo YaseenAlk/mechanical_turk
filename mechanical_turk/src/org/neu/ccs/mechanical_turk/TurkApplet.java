@@ -321,6 +321,9 @@ public class TurkApplet extends JApplet {
 			press = null;
 
 			repaint();
+			
+			if (query.split(" ").length < TurkApplet.MIN_QUERY_LENGTH || query == null || query == "null") //current way to "cancel"
+				undo();
 		}
 
 		/**
