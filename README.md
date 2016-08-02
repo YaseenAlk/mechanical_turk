@@ -1,3 +1,5 @@
+#Todo list
+Things we couldn't get to will be listed here. 
 # --------------- 
 # This README is still a work in progress and should be completed soon. Sorry for the inconvenience 
 # ---------------
