@@ -291,7 +291,7 @@ public class Qualification extends TurkApplet {
 		//Local score to calculate how many points earned for bounding boxes
 		int score = 0;
 		
-		if((userNO + gtNO) / gtArea <= .15)
+		if((userNO + gtNO) / gtArea <= .175)
 		{
 			score++;
 		}
