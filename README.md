@@ -1,8 +1,7 @@
 # --------------- 
 # This README is still a work in progress and should be completed soon. Sorry for the inconvenience 
 # ---------------
-# NU YSP 2016: 
-# Interface for Drawing Bounding Boxes in Images
+# NU YSP 2016: Interface for Drawing Bounding Boxes in Images
 
 This README will detail the layout and structure of our project, and explain how to get certain data from our code.
 
