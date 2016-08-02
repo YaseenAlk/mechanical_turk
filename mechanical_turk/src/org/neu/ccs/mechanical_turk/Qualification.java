@@ -68,21 +68,32 @@ public class Qualification extends TurkApplet {
 			//Requires that already know the coordinates from example image
 			
 			//Monitor
+			System.out.println("Checking monitor");
 			qualScore += checkCoords(120, 0, 449, 198, currentC);
+			System.out.println("");
 			
 			//Keyboard
-			qualScore += checkCoords(451, 178, 163, 290, currentC);
+			System.out.println("Checking keyboard");
+			qualScore += checkCoords(172, 283, 451, 186, currentC);
+			System.out.println("");
 			
 			//Red Bull
-			qualScore += checkCoords(480, 168, 514, 216, currentC);
+			System.out.println("Checking red bull");
+			qualScore += checkCoords(482, 170, 512, 217, currentC);
+			System.out.println("");
 			
 			//Cup
+			System.out.println("Checking cup");
 			qualScore += checkCoords(437, 131, 497, 190, currentC);
+			System.out.println("");
 			
 			//Book
+			System.out.println("Checking book");
 			qualScore += checkCoords(25, 190, 190, 317, currentC);
+			System.out.println("");
 			
 			//Mouse
+			System.out.println("Checking mouse");
 			qualScore += checkCoords(467, 243, 531, 309, currentC);
 			
 			checkScore = true;
@@ -172,6 +183,7 @@ public class Qualification extends TurkApplet {
 				}
 			}else{				
 				System.out.println("you are not certified");
+				qualScore = 0;
 			}
 		}
 	}
@@ -199,18 +211,19 @@ public class Qualification extends TurkApplet {
 		int secX = (int) b.getX();
 		int secY = (int) b.getY();
 		
-		//Finding the four coordinates
+		//Finding the top left user coordinates
 		//Left
 		int leftX = Math.min(firstX, secX);
-		
-		//Right
-		int rightX = Math.max(firstX, secX);
 		
 		//Top
 		int topY = Math.min(firstY,secY);
 		
-		//Bottom
-		int bottomY = Math.max(firstY,secY);
+		//Finding the top left ground truth coordinates
+		//Left
+		int gtLeftX = Math.min(x1, x2);
+		
+		//Top
+		int gtTopY = Math.min(y1, y2);
 		
 		//For debugging purposes
 		System.out.println("FirstX " + firstX);
@@ -219,48 +232,66 @@ public class Qualification extends TurkApplet {
 		System.out.println("SecondX " + secX);
 		System.out.println("SecondY " + secY);
 		
-		//Finding the userLength and width of the user bounding box
-		double userLength =  java.lang.Math.abs(secX - firstX);
-		double userWidth =  java.lang.Math.abs(secY - firstY);
+		//Finding the userWidth and width of the user bounding box
+		double userWidth =  java.lang.Math.abs(secX - firstX);
+		double userHeight =  java.lang.Math.abs(secY - firstY);
 		
 		//Finding the area
-		double userArea = userLength * userWidth;
+		double userArea = userWidth * userHeight;
+		System.out.println("userArea: " + userArea);
 		
 		//Finding length and width of the ground truth rectangle
-		double gtLength =  java.lang.Math.abs(x2 - x1);
-		double gtWidth =  java.lang.Math.abs(y2 - y1);
+		double gtWidth =  java.lang.Math.abs(x2 - x1);
+		double gtHeight =  java.lang.Math.abs(y2 - y1);
 		
 		//Finding the area
-		double gtArea = gtLength * gtWidth;
+		double gtArea = gtWidth * gtHeight;
+		System.out.println("gtArea: " + gtArea);
 		
 		//Finding the intersection of the rectangles		
 		//User Rectangle
-		Rectangle userRectangle = new Rectangle(leftX, topY, rightX, bottomY);
-		System.out.println(userRectangle.getBounds());
+		Rectangle userRectangle = new Rectangle(leftX, topY, (int)userWidth, (int) userHeight);
+		System.out.println("userRectangle: " + userRectangle.getBounds());
 		
 		//Ground truth rectangle
-		Rectangle gtRectangle = new Rectangle(x1, y1, x2, y2);
-		System.out.println(gtRectangle.getBounds());
+		Rectangle gtRectangle = new Rectangle(gtLeftX, gtTopY, (int)gtWidth, (int)gtHeight);
+		System.out.println("gtRectangle: " + gtRectangle.getBounds());
+		if(gtRectangle.intersects(userRectangle)) 
+			System.out.println("The rectangles intersect");
+		else
+			System.out.println("The rectangles do not intersect");
 		
 		//Intersection
-		Rectangle intRect = userRectangle.intersection(gtRectangle);
-		System.out.println(intRect.getBounds());
+		Rectangle intRect = new Rectangle();
+		if(java.lang.Math.abs(userRectangle.intersection(gtRectangle).width * userRectangle.intersection(gtRectangle).height) >= 
+		   java.lang.Math.abs(gtRectangle.intersection(userRectangle).width * gtRectangle.intersection(userRectangle).height))
+			{
+			intRect = userRectangle.intersection(gtRectangle);
+			}
+		else
+		{
+			intRect = gtRectangle.intersection(userRectangle); 
+		}
+		System.out.println("intRect: " + intRect.getBounds());
 		
 		//Finding the area of non-overlap
 		double intWidth = intRect.getWidth();
 		double intHeight = intRect.getHeight();
 		
-		double intArea = intWidth * intHeight;
+		double intArea = java.lang.Math.abs(intWidth * intHeight);
+		System.out.println("intArea: " + intArea);
 		
 		//Non-overlap of user Rectangle
-		double userNO = userArea - intArea;
+		double userNO = java.lang.Math.abs(userArea - intArea);
+		System.out.println("userNO: " + userNO);
 		//Non-overlap of ground truth rectangle
-		double gtNO = gtArea - intArea;
-
+		double gtNO = java.lang.Math.abs(gtArea - intArea);
+		System.out.println("gtNO: " + gtNO);
+		
 		//Local score to calculate how many points earned for bounding boxes
 		int score = 0;
 		
-		if((userNO + gtNO) / gtArea <= .1)
+		if((userNO + gtNO) / gtArea <= .15)
 		{
 			score++;
 		}
