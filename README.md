@@ -35,11 +35,11 @@ Qualification is based on a scoring system out of 26.
 
 Currently 16 out of 26 points, or 60%, is required to qualify.
 
-1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query. Both values can be modified using the `qualScore` variable. 
+1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query. The score can be modified using the `qualScore` variable. 
 
-All user bounding boxes and queries are called from `qualCoord()` using `getBoxCoords` and `getQueries`
+All user bounding boxes and queries are called from `qualCoord()` using `getBoxCoords()` and `getQueries()`
 
-All of these ground truth values and key words are stored within `qualCoord()`, and need to be manually modified in their respective methods if the image is changed. This can be done within `init()` and this is currently done through only a web address. Two coordinates need to be entered and need to be diagnol from each other. The query words can be any desired word or number. It is recomended that they have a "descriptor", the name of the object , and the location of the object relative to others. 
+All of these ground truth values and key words are stored within `qualCoord()`, and need to be manually modified if the image is changed. This can be done within `init()` and this is currently done through only a web address. Two coordinates need to be entered and need to be diagonal from each other. The query words can be any desired word or number. It is recomended that they have a "descriptor", the name of the object , and the location of the object relative to others. 
 
 Because all queries are called from within a list, they are first taken apart into pairs, which are made of two diaganol coordinates. Therefore, in order to check all the coordinates, a loop is run for every bounding box pair. Every user bounding box is then compared to all ground truth bounding boxes. This works the same for the queries where a loop is run for every query and checks with desired key words. 
 
