@@ -27,17 +27,25 @@ There are a few public "getter" and "setter" methods within the applet that can 
 
 ...more stuff about constructors/qualification/image bank/exporting data/scaled and unscaled images here...
 
-# Qualification
+# Qualification (Qualification.java) 
 
-Qualification is based on a scoring system out of 26
+Qualification extends TurkApplet. This is so that the Qualification class can implement `setUrl()` `init()` `getBoxCoords` `getQueries`  This essentially allows Qualification to run as the turkApplet with just an additional test. 
 
-Currently 16 out of 26 points, or 60%, is required to qualify
+Qualification is based on a scoring system out of 26.
 
-1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query
+Currently 16 out of 26 points, or 60%, is required to qualify.
 
-All of these ground truth values and key words are stored, and need to be manually modified in their respective methods if the image is changed. 
+1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query. Both values can be modified using the `qualScore` variable. 
 
-# GUI
+All user bounding boxes and queries are called from `qualCoord()` using `getBoxCoords` and `getQueries`
+
+All of these ground truth values and key words are stored within `qualCoord()`, and need to be manually modified in their respective methods if the image is changed. This can be done within `init()` and this is currently done through only a web address. Two coordinates need to be entered and need to be diagnol from each other. The query words can be any desired word or number. It is recomended that they have a "descriptor", the name of the object , and the location of the object relative to others. 
+
+Because all queries are called from within a list, they are first taken apart into pairs, which are made of two diaganol coordinates. Therefore, in order to check all the coordinates, a loop is run for every bounding box pair. Every user bounding box is then compared to all ground truth bounding boxes. This works the same for the queries where a loop is run for every query and checks with desired key words. 
+
+However, for the user bounding box coordinates and the queries to be checked, they each have their own method `checkCoords(int x1, y1, int x2, int y2, Pair currentC)` and `checkForPossibilities(String query, String[] possibilities)` respectivley. The parameters `int x1` , `int y1` , `int x2` , `int y2` are the ground truth coordinates, found diagonaly on the ground truth bounding box. `Pair currentC` is the user's Pair that will be compared with the ground truth coordinates. For `checkForPossibilities(String query, String[] possibilities)` , `String query` is the user query for one object, and `String[] possibilities` is the possibilites for an object that it will be checked against. 
+
+# GUI (GUI.java)
 
 Talk about buttons and multithreadedness here
 
