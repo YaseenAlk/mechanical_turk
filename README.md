@@ -45,7 +45,7 @@ Both of these methods are called to check the bounding boxes and queries respect
 
 Because all queries are called from within a list, they are first taken apart into pairs, which are made of two diaganol coordinates. Therefore, in order to check all the coordinates, a loop is run for every bounding box pair. Every user bounding box is then compared to all ground truth bounding boxes. This works the same for the queries where a loop is run for every query and checks with desired key words. 
 
-The bounding box coordinates are compared to the ground truth by comparing their area of non-overlap using the equation _((A\B) + (B/A)) / A < .175_. Currently .175 is chosen because it allows for an accurate measurement of whether the user bounding box is accurate, but is also no too strict that the qualification cannot be achieved. This value ofcourse can always be fixed. 
+The bounding box coordinates are compared to the ground truth by comparing their area of non-overlap using the equation _((A\B) + (B\A)) / A < .175_ , where A is the area of the the ground truth rectangle and B is the area of the user Rectangle. This is done by converting the user coordinates and ground truth coordinates into rectangles and finding the intersection. This then creates a third intersection rectangle that is used to find the non-overlap. Currently .175 is chosen because it allows for an accurate measurement of whether the user bounding box is accurate, but is also no too strict that the qualification cannot be achieved. This value can be changed to any other desired amount. 
 
 # GUI (GUI.java)
 
