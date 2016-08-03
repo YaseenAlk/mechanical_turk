@@ -1,4 +1,4 @@
-#Todo list
+#To do list
 Things we couldn't get to will be listed here. 
 # --------------- 
 # This README is still a work in progress and should be completed soon. Sorry for the inconvenience 
@@ -29,7 +29,10 @@ There are a few public "getter" and "setter" methods within the applet that can 
 
 # Qualification
 
-This is still being worked on.
+Qualification is based on a scoring system out of 26
+Currently 16 out of 26 points, or 60%, is required to qualify
+1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query
+All of these ground truth values and key words are stored, and need to be manually modified in their respective methods if the image is changed. 
 
 # GUI
 
