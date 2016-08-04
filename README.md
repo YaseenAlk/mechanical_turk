@@ -29,15 +29,13 @@ There are a few public "getter" and "setter" methods within the applet that can 
 
 # Qualification `Qualification.java`
 
-Qualification extends TurkApplet. This is so that the Qualification class can implement `setUrl()` `init()` `getBoxCoords` `getQueries`  This essentially allows Qualification to run as the turkApplet with just an additional test. 
+Qualification extends TurkApplet. This is so that the Qualification class can implement `setUrl()` , `init()` , `getBoxCoords` , `getQueries`  This essentially allows Qualification to run as the turkApplet with just an additional test. 
 
 Qualification is based on a scoring system out of 26. Currently 16 out of 26 points, or 60%, is required to qualify. 1 point is awarded for a correct bounding box, and 1 point for a correct "key word" from their query. The score can be modified using the `qualScore` variable. 
 
 All user bounding boxes and queries are called from `qualCoord()` using `getBoxCoords()` and `getQueries()`
 
-All of these ground truth values and key words are stored within `qualCoord()`, and need to be manually modified if the image is changed. Images can be changed within `init()` and this is currently done through only a web address. Two coordinates need to be entered and need to be diagonal from each other for each object. The query words can be any desired word or number. It is recomended that they have a "descriptor", the name of the object , and the location of the object relative to others. This is done by calling `checkCoords(int x1, y1, int x2, int y2, Pair currentC)` and `checkForPossibilities(String query, String[] possibilities)`
-
-Both of these methods are called to check the bounding boxes and queries respectivley. The parameters `int x1` , `int y1` , `int x2` , `int y2` are the ground truth coordinates, found diagonaly on the ground truth bounding box. `Pair currentC` is the user's Pair that will be compared with the ground truth coordinates. For `checkForPossibilities(String query, String[] possibilities)` , `String query` is the user query for one object, and `String[] possibilities` is the possibilites for an object that it will be checked against. Both of these methods return a score that is added to the `qualScore`. This explains `qualScore += checkingMethod...`
+All of these ground truth values and key words are stored within `qualCoord()`, and need to be manually modified if the image is changed. Images can be changed within `init()` and this is currently done through only a web address. Comparing the correct values with the user ones are done by calling `checkCoords(int x1, y1, int x2, int y2, Pair currentC)` and `checkForPossibilities(String query, String[] possibilities)`. These methods parameters also serve as the storage for the ground truth coordinates and correct queries. The parameters `int x1` , `int y1` , `int x2` , `int y2` are the ground truth coordinates, found diagonaly on the ground truth bounding box. `Pair currentC` is the user's Pair that will be compared with the ground truth coordinates. For `checkForPossibilities(String query, String[] possibilities)` , `String query` is the user query for one object, and `String[] possibilities` is the possibilites for an object that it will be checked against. It is recomended that they have a "descriptor", the name of the object , and the location of the object relative to others. Both of these checking methods return a score that is added to the `qualScore`. This explains `qualScore += checkingMethod...`
 ```java
 //Monitor
 
@@ -52,7 +50,7 @@ if (query.toLowerCase().contains("monitor") || query.toLowerCase().contains("scr
 ...
 ```
 
-Because all queries are called from within a list, they are first taken apart into pairs, which are made of two diaganol coordinates. Therefore, in order to check all the coordinates, a loop is run for every bounding box pair. Every user bounding box is then compared to all ground truth bounding boxes. This works the same for the queries where a loop is run for every query and checks with desired key words. 
+Because all bounding boxes are called from within a list, they are first taken apart into pairs, which are made of two diaganol (x,y) coordinates. Therefore, in order to check all the coordinates, a loop is run for every bounding box pair. Every user bounding box is then compared to all ground truth bounding boxes. This works the same for the queries where a loop is run for every query and checks with desired key words. 
 
 ```java
 ArrayList<Pair>boxC = getBoxCoords();
